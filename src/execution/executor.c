@@ -30,6 +30,7 @@ static void	apply_prefix_env(t_env **env, char **prefix_env)
 	int		i;
 	char	*key;
 	char	*value;
+	char	*expanded;
 
 	if (!prefix_env)
 		return ;
@@ -38,7 +39,12 @@ static void	apply_prefix_env(t_env **env, char **prefix_env)
 	{
 		if (split_key_value_assignment(prefix_env[i], &key, &value) == 0)
 		{
-			env_set(env, key, value);
+			expanded = expand_value(value, *env);
+			if (expanded)
+			{
+				env_set(env, key, expanded);
+				free(expanded);
+			}
 			free(key);
 			free(value);
 		}
@@ -67,6 +73,7 @@ int	execute_command(t_ast *node, t_env **env)
 	int		i;
 	char	*key;
 	char	*value;
+	char	*expanded;
 
 	if (!node)
 		return (-1);
@@ -80,7 +87,12 @@ int	execute_command(t_ast *node, t_env **env)
 				if (split_key_value_assignment(node->prefix_env[i],
 						&key, &value) == 0)
 				{
-					env_set(env, key, value);
+					expanded = expand_value(value, *env);
+					if (expanded)
+					{
+						env_set(env, key, expanded);
+						free(expanded);
+					}
 					free(key);
 					free(value);
 				}
