@@ -6,7 +6,7 @@
 /*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/21 06:14:49 by radandri          #+#    #+#             */
-/*   Updated: 2026/01/21 18:28:41 by codespace        ###   ########.fr       */
+/*   Updated: 2026/01/22 17:13:57 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ static char	*expand_and_join(char *result, const char *value, int *i,
 {
 	char	*var;
 	char	*tmp;
+	char	*var_value;
 	int		start;
 
 	start = ++(*i);
@@ -65,7 +66,10 @@ static char	*expand_and_join(char *result, const char *value, int *i,
 	var = ft_substr(value, start, *i - start);
 	if (!var)
 		return (free(result), NULL);
-	tmp = ft_strjoin(result, env_get(env, var));
+	var_value = env_get(env, var);
+	if (!var_value)
+		var_value = "";
+	tmp = ft_strjoin(result, var_value);
 	free(result);
 	free(var);
 	return (tmp);

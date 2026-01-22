@@ -13,6 +13,7 @@
 #include "../environment/env.h"
 #include "ast.h"
 #include "../builtin/builtin.h"
+#include "../utils/utils.h"
 /*
 ** we need to know the numbers of tokens
 ** between 2 segment (start-> end) for argv
@@ -38,6 +39,8 @@ char	*expand_token(char *token, t_env *env)
 		return (ft_strdup(""));
 	if (token[0] == '~' && (token[1] == '\0' || token[1] == '/'))
 		return (expand_tilde(token, env));
+	if (ft_strchr(token, '$'))
+		return (expand_value(token, env));
 	return (ft_strdup(token));
 }
 
