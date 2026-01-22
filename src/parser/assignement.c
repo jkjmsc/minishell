@@ -25,8 +25,7 @@ int	is_assignment(const char *token)
 	operator_found = 0;
 	while (token[i] && token[i] != '=')
 	{
-		if (token[i] == '+' || token[i] == '-' || token[i] == '*'
-			|| token[i] == '/' || token[i] == '%')
+		if (token[i] == '+')
 		{
 			if (operator_found)
 				return (0);
@@ -50,9 +49,7 @@ int	split_key_value_assignment(const char *token, char **key, char **value)
 	if (!equal_sign)
 		return (-1);
 	key_len = equal_sign - token;
-	if (key_len > 0 && (token[key_len - 1] == '+' || token[key_len - 1] == '-'
-			|| token[key_len - 1] == '*' || token[key_len - 1] == '/'
-			|| token[key_len - 1] == '%'))
+	if (key_len > 0 && token[key_len - 1] == '+')
 		key_len--;
 	*key = ft_substr(token, 0, key_len);
 	*value = ft_strdup(equal_sign + 1);

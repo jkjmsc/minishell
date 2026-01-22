@@ -26,7 +26,6 @@ SRC	=	src/main.c	\
 		src/parser/assignement.c \
 		src/parser/assignement1.c \
 		src/parser/assignement2.c \
-		src/parser/assignement3.c \
 		src/utils/tokens_utils.c \
 		src/builtin/ft_exit.c \
 		src/builtin/ft_echo.c \
