@@ -25,6 +25,27 @@ static char	*get_cmd_path(char *cmd, t_env *env)
 	return (find_path(cmd, env));
 }
 
+static void	apply_prefix_env(t_env **env, char **prefix_env)
+{
+	int		i;
+	char	*key;
+	char	*value;
+
+	if (!prefix_env)
+		return ;
+	i = 0;
+	while (prefix_env[i])
+	{
+		if (split_key_value_assignment(prefix_env[i], &key, &value) == 0)
+		{
+			env_set(env, key, value);
+			free(key);
+			free(value);
+		}
+		i++;
+	}
+}
+
 static void	exec_child(char **cmd_args, char *path, t_env **env)
 {
 	execve(path, cmd_args, env_to_array(*env));
@@ -43,9 +64,31 @@ int	execute_command(t_ast *node, t_env **env)
 	pid_t	pid;
 	int		status;
 	char	*path;
+	int		i;
+	char	*key;
+	char	*value;
 
-	if (!node || !node->cmd_args || !node->cmd_args[0])
+	if (!node)
 		return (-1);
+	if (!node->cmd_args || !node->cmd_args[0])
+	{
+		if (node->prefix_env)
+		{
+			i = 0;
+			while (node->prefix_env[i])
+			{
+				if (split_key_value_assignment(node->prefix_env[i],
+						&key, &value) == 0)
+				{
+					env_set(env, key, value);
+					free(key);
+					free(value);
+				}
+				i++;
+			}
+		}
+		return (0);
+	}
 	if (is_builtin(node->cmd_args[0]))
 		return (execute_builtin(node, env));
 	pid = fork();
@@ -54,6 +97,7 @@ int	execute_command(t_ast *node, t_env **env)
 	if (pid == 0)
 	{
 		reset_child_signals();
+		apply_prefix_env(env, node->prefix_env);
 		path = get_cmd_path(node->cmd_args[0], *env);
 		if (!path)
 		{

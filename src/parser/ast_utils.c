@@ -65,7 +65,8 @@ char	**tokens_to_argv(t_token *start, t_token *end, t_env *env)
 	safe_malloc((void **)&argv, sizeof(char *) * (n + 1));
 	while (current != end->next)
 	{
-		argv[i++] = expand_token(current->value, env);
+		if (!is_assignment(current->value))
+			argv[i++] = expand_token(current->value, env);
 		current = current->next;
 	}
 	argv[i] = NULL;
@@ -92,6 +93,16 @@ void	free_ast(t_ast *node)
 			i++;
 		}
 		free(node->cmd_args);
+	}
+	if (node->prefix_env)
+	{
+		i = 0;
+		while (node->prefix_env[i])
+		{
+			free(node->prefix_env[i]);
+			i++;
+		}
+		free(node->prefix_env);
 	}
 	if (node->filename)
 		free(node->filename);

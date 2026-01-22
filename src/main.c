@@ -85,7 +85,6 @@ static int	run_shell_loop(t_env **env)
 			if (action == 1)
 				continue ;
 		}
-		process_all_assignments(head, env);
 		process_command(&head, env);
 	}
 	terminate_dll(&head);

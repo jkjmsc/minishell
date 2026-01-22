@@ -26,7 +26,36 @@ t_ast	*create_ast_node(t_node_type type)
 	node->left = NULL;
 	node->right = NULL;
 	node->filename = NULL;
+	node->prefix_env = NULL;
 	return (node);
+}
+
+static char	**get_prefix_assignments(t_token *start, t_token *end)
+{
+	char	**assignments;
+	int		count;
+	int		i;
+	t_token	*current;
+
+	count = 0;
+	current = start;
+	while (current != end->next && is_assignment(current->value))
+	{
+		count++;
+		current = current->next;
+	}
+	if (count == 0)
+		return (NULL);
+	safe_malloc((void **)&assignments, sizeof(char *) * (count + 1));
+	i = 0;
+	current = start;
+	while (current != end->next && is_assignment(current->value))
+	{
+		assignments[i++] = ft_strdup(current->value);
+		current = current->next;
+	}
+	assignments[i] = NULL;
+	return (assignments);
 }
 
 /*
@@ -44,6 +73,7 @@ t_ast	*create_command_node(t_token *start, t_token *end, t_env *env)
 	node = create_ast_node(CMD);
 	if (!node)
 		return (NULL);
+	node->prefix_env = get_prefix_assignments(start, end);
 	node->cmd_args = tokens_to_argv(start, end, env);
 	return (node);
 }

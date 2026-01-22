@@ -23,6 +23,7 @@ typedef struct s_ast
 	struct s_ast	*right;
 	char			**cmd_args;
 	char			*filename;
+	char			**prefix_env;
 }					t_ast;
 
 void				print_ast(t_ast *node, int depth);
