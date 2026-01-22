@@ -76,14 +76,10 @@ char	**tokens_to_argv(t_token *start, t_token *end, t_env *env)
 /*
 ** recursively frees an entire ast in a post order
 */
-void	free_ast(t_ast *node)
+static void	free_ast_arrays(t_ast *node)
 {
 	int	i;
 
-	if (node == NULL)
-		return ;
-	free_ast(node->left);
-	free_ast(node->right);
 	if (node->cmd_args)
 	{
 		i = 0;
@@ -104,6 +100,15 @@ void	free_ast(t_ast *node)
 		}
 		free(node->prefix_env);
 	}
+}
+
+void	free_ast(t_ast *node)
+{
+	if (node == NULL)
+		return ;
+	free_ast(node->left);
+	free_ast(node->right);
+	free_ast_arrays(node);
 	if (node->filename)
 		free(node->filename);
 	free(node);

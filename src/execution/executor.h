@@ -36,6 +36,14 @@ int			execute_command(t_ast *node, t_env **env);
 
 void		reset_child_signals(void);
 
+char		*get_cmd_path(char *cmd, t_env *env);
+
+void		apply_prefix_env(t_env **env, char **prefix_env);
+
+void		exec_child(char **cmd_args, char *path, t_env **env);
+
+int			execute_forked_command(t_ast *node, t_env **env);
+
 int			is_builtin(char *cmd);
 
 int			execute_builtin(t_ast *node, t_env **env);

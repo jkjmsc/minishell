@@ -66,6 +66,8 @@ int						split_key_value_assignment(const char *token,
 							char **key, char **value);
 char					*expand_value(const char *value, t_env *env);
 int						process_assignment(t_env **env, const char *token);
+int						process_compound_assignment(t_env **env,
+							const char *token, char *key, char *expanded);
 void					process_all_assignments(t_token *head, t_env **env);
 
 #endif

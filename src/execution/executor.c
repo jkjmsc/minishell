@@ -12,20 +12,21 @@
 
 #include "../environment/env.h"
 #include "executor.h"
+#include "../utils/utils.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-static char	*get_cmd_path(char *cmd, t_env *env)
+char	*get_cmd_path(char *cmd, t_env *env)
 {
 	if (cmd[0] == '/' || cmd[0] == '.')
 		return (cmd);
 	return (find_path(cmd, env));
 }
 
-static void	apply_prefix_env(t_env **env, char **prefix_env)
+void	apply_prefix_env(t_env **env, char **prefix_env)
 {
 	int		i;
 	char	*key;
@@ -42,7 +43,8 @@ static void	apply_prefix_env(t_env **env, char **prefix_env)
 			expanded = expand_value(value, *env);
 			if (expanded)
 			{
-				env_set(env, key, expanded);
+				process_compound_assignment(env, prefix_env[i], key,
+					expanded);
 				free(expanded);
 			}
 			free(key);
@@ -52,7 +54,7 @@ static void	apply_prefix_env(t_env **env, char **prefix_env)
 	}
 }
 
-static void	exec_child(char **cmd_args, char *path, t_env **env)
+void	exec_child(char **cmd_args, char *path, t_env **env)
 {
 	execve(path, cmd_args, env_to_array(*env));
 	perror("execve");
@@ -67,58 +69,14 @@ void	reset_child_signals(void)
 
 int	execute_command(t_ast *node, t_env **env)
 {
-	pid_t	pid;
-	int		status;
-	char	*path;
-	int		i;
-	char	*key;
-	char	*value;
-	char	*expanded;
-
 	if (!node)
 		return (-1);
 	if (!node->cmd_args || !node->cmd_args[0])
 	{
-		if (node->prefix_env)
-		{
-			i = 0;
-			while (node->prefix_env[i])
-			{
-				if (split_key_value_assignment(node->prefix_env[i],
-						&key, &value) == 0)
-				{
-					expanded = expand_value(value, *env);
-					if (expanded)
-					{
-						env_set(env, key, expanded);
-						free(expanded);
-					}
-					free(key);
-					free(value);
-				}
-				i++;
-			}
-		}
+		apply_prefix_env(env, node->prefix_env);
 		return (0);
 	}
 	if (is_builtin(node->cmd_args[0]))
 		return (execute_builtin(node, env));
-	pid = fork();
-	if (pid < 0)
-		return (perror("fork"), -1);
-	if (pid == 0)
-	{
-		reset_child_signals();
-		apply_prefix_env(env, node->prefix_env);
-		path = get_cmd_path(node->cmd_args[0], *env);
-		if (!path)
-		{
-			printf("minishell: command not found: %s.\n", node->cmd_args[0]);
-			exit(127);
-		}
-		exec_child(node->cmd_args, path, env);
-	}
-	if (waitpid(pid, &status, 0) == -1)
-		return (perror("waitpid"), -1);
-	return (status);
+	return (execute_forked_command(node, env));
 }

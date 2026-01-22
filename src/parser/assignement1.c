@@ -31,7 +31,7 @@ int	process_assignment(t_env **env, const char *token)
 		free(key);
 		return (-1);
 	}
-	if (env_set(env, key, expanded) != 0)
+	if (process_compound_assignment(env, token, key, expanded) != 0)
 	{
 		free(key);
 		free(expanded);

@@ -36,6 +36,8 @@ t_ast				*create_command_node(t_token *start, t_token *end,
 t_ast				*ast_build(t_token *head, t_token *tail, t_env *env);
 int					count_tokens_range(t_token *start, t_token *end);
 char				**tokens_to_argv(t_token *start, t_token *end, t_env *env);
+char				**get_prefix_assignments(t_token *start, t_token *end);
+void				update_lowest_operator(t_token **lowest, t_token *current);
 
 void				free_ast(t_ast *node);
 

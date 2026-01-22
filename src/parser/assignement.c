@@ -17,13 +17,22 @@
 int	is_assignment(const char *token)
 {
 	int	i;
+	int	operator_found;
 
 	if (!token || (!ft_isalpha(token[0]) && token[0] != '_'))
 		return (0);
 	i = 1;
+	operator_found = 0;
 	while (token[i] && token[i] != '=')
 	{
-		if (!ft_isalnum(token[i]) && token[i] != '_')
+		if (token[i] == '+' || token[i] == '-' || token[i] == '*'
+			|| token[i] == '/' || token[i] == '%')
+		{
+			if (operator_found)
+				return (0);
+			operator_found = 1;
+		}
+		else if (!ft_isalnum(token[i]) && token[i] != '_')
 			return (0);
 		i++;
 	}
@@ -33,13 +42,19 @@ int	is_assignment(const char *token)
 int	split_key_value_assignment(const char *token, char **key, char **value)
 {
 	char	*equal_sign;
+	int		key_len;
 
 	if (!token || !key || !value)
 		return (-1);
 	equal_sign = ft_strchr(token, '=');
 	if (!equal_sign)
 		return (-1);
-	*key = ft_substr(token, 0, equal_sign - token);
+	key_len = equal_sign - token;
+	if (key_len > 0 && (token[key_len - 1] == '+' || token[key_len - 1] == '-'
+			|| token[key_len - 1] == '*' || token[key_len - 1] == '/'
+			|| token[key_len - 1] == '%'))
+		key_len--;
+	*key = ft_substr(token, 0, key_len);
 	*value = ft_strdup(equal_sign + 1);
 	if (!*key || !*value)
 	{

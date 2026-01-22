@@ -25,6 +25,8 @@ SRC	=	src/main.c	\
 		src/parser/ast_utils.c \
 		src/parser/assignement.c \
 		src/parser/assignement1.c \
+		src/parser/assignement2.c \
+		src/parser/assignement3.c \
 		src/utils/tokens_utils.c \
 		src/builtin/ft_exit.c \
 		src/builtin/ft_echo.c \
@@ -43,6 +45,7 @@ SRC	=	src/main.c	\
 	src/tokenization/input_utils.c \
 	src/signal_handling/signal1.c \
 		src/execution/executor.c \
+		src/execution/executor2.c \
 		src/execution/execute_special.c \
 		src/execution/redirect_utils.c \
 		src/execution/pipe_utils.c \
@@ -52,7 +55,9 @@ SRC	=	src/main.c	\
 		src/errors/errors.c \
 		src/environment/env.c \
 		src/environment/env_utils.c \
-		src/environment/env_utils1.c
+		src/environment/env_utils1.c \
+		src/environment/env_utils2.c \
+		src/parser/ast_build1.c
 
 BSRC	=
 # Object files

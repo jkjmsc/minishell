@@ -30,34 +30,6 @@ t_ast	*create_ast_node(t_node_type type)
 	return (node);
 }
 
-static char	**get_prefix_assignments(t_token *start, t_token *end)
-{
-	char	**assignments;
-	int		count;
-	int		i;
-	t_token	*current;
-
-	count = 0;
-	current = start;
-	while (current != end->next && is_assignment(current->value))
-	{
-		count++;
-		current = current->next;
-	}
-	if (count == 0)
-		return (NULL);
-	safe_malloc((void **)&assignments, sizeof(char *) * (count + 1));
-	i = 0;
-	current = start;
-	while (current != end->next && is_assignment(current->value))
-	{
-		assignments[i++] = ft_strdup(current->value);
-		current = current->next;
-	}
-	assignments[i] = NULL;
-	return (assignments);
-}
-
 /*
 ** Create a leaf node without children using tokens
 **
@@ -76,22 +48,6 @@ t_ast	*create_command_node(t_token *start, t_token *end, t_env *env)
 	node->prefix_env = get_prefix_assignments(start, end);
 	node->cmd_args = tokens_to_argv(start, end, env);
 	return (node);
-}
-
-static void	update_lowest_operator(t_token **lowest, t_token *current)
-{
-	int	current_priority;
-	int	lowest_priority;
-
-	current_priority = get_token_priority(current->type);
-	if (*lowest == NULL)
-	{
-		*lowest = current;
-		return ;
-	}
-	lowest_priority = get_token_priority((*lowest)->type);
-	if (current_priority >= lowest_priority)
-		*lowest = current;
 }
 
 /*
