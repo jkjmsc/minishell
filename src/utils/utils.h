@@ -58,9 +58,13 @@ int						print_syntax_not_implemented(const char *op);
 int						validate_token_list(t_token *head);
 void					print_tokens(t_token *head);
 int						open_redir(t_token *redir, t_token *filename);
-void					handle_redirections(t_token *head);
+int						handle_redirections(t_token *head);
 void					close_all_fds(t_token *head);
 void					close_fd(t_token *token);
+void					set_exit_code(t_env **env, int exit_code);
+void					init_shell_env(t_env **env);
+void					validate_and_set_error(t_token **head, t_env **env,
+							int *last_exit_code);
 int						is_assignment(const char *token);
 int						split_key_value_assignment(const char *token,
 							char **key, char **value);

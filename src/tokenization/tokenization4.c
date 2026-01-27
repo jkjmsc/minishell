@@ -108,25 +108,3 @@ void	terminate_dll(t_token **token)
 		curr = nxt;
 	}
 }
-
-/*
-** Function to check whether there exist odd
-** or even number of a specific character.
-*/
-int	count_char(const char *buffer, const char c)
-{
-	int	count;
-	int	i;
-
-	if (!buffer)
-		return (0);
-	count = 0;
-	i = 0;
-	while (buffer[i])
-	{
-		if (buffer[i] == c)
-			count++;
-		i++;
-	}
-	return (count);
-}

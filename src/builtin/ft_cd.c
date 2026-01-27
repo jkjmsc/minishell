@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_cd.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: radandri <radandri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/27 21:21:42 by radandri          #+#    #+#             */
-/*   Updated: 2026/01/21 00:21:36 by radandri         ###   ########.fr       */
+/*   Updated: 2026/01/27 19:33:17 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,8 @@ static char	*get_target_path(int argc, char **argv, t_env *env)
 
 	if (argc == 1)
 		return (env_get(env, "HOME"));
-	if (argv[1][0] == '-' && (argv[1][1] == '\0' || 
-			(argv[1][1] == '-' && argv[1][2] == '\0')))
+	if (argv[1][0] == '-' && (argv[1][1] == '\0' || (argv[1][1] == '-'
+				&& argv[1][2] == '\0')))
 	{
 		if (argv[1][1] == '\0')
 		{

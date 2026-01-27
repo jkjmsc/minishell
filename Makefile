@@ -19,8 +19,10 @@ CFLAGS	=	-Wall	-Wextra	-Werror
 CLIBS	= -lreadline
 # Source files
 SRC	=	src/main.c	\
+		src/shell_init.c \
 		src/utils/utils1.c \
 		src/utils/utils2.c \
+		src/utils/fd_utils.c \
 		src/parser/ast_build.c \
 		src/parser/ast_utils.c \
 		src/parser/assignement.c \

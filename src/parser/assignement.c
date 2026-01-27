@@ -84,7 +84,7 @@ static char	*get_var_name(const char *value, int *i)
 	return (var);
 }
 
-static char	*expand_and_join(char *result, const char *value, int *i,
+char	*expand_and_join(char *result, const char *value, int *i,
 		t_env *env)
 {
 	char	*var;
@@ -103,7 +103,7 @@ static char	*expand_and_join(char *result, const char *value, int *i,
 	return (tmp);
 }
 
-static char	*append_char(char *result, char c)
+char	*append_char(char *result, char c)
 {
 	char	buf[2];
 	char	*tmp;
@@ -113,30 +113,4 @@ static char	*append_char(char *result, char c)
 	tmp = ft_strjoin(result, buf);
 	free(result);
 	return (tmp);
-}
-
-char	*expand_value(const char *value, t_env *env)
-{
-	char	*result;
-	char	*tmp;
-	int		i;
-
-	if (!value)
-		return (ft_strdup(""));
-	result = ft_strdup("");
-	if (!result)
-		return (NULL);
-	i = 0;
-	while (value[i])
-	{
-		if (value[i] == '$' && (ft_isalpha(value[i + 1]) || value[i + 1] == '_'
-				|| value[i + 1] == '?'))
-			tmp = expand_and_join(result, value, &i, env);
-		else
-			tmp = append_char(result, value[i++]);
-		if (!tmp)
-			return (NULL);
-		result = tmp;
-	}
-	return (result);
 }

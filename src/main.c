@@ -46,13 +46,10 @@ static void	process_command(t_token **head, t_env **env, int *last_exit_code)
 {
 	t_ast	*ast;
 	t_token	*tail;
-	char	*exit_code_str;
 
-	if (validate_token_list(*head))
-	{
-		terminate_dll(head);
+	validate_and_set_error(head, env, last_exit_code);
+	if (*last_exit_code == 2)
 		return ;
-	}
 	tail = last_node(*head);
 	ast = ast_build(*head, tail, *env);
 	if (!ast)
@@ -60,14 +57,16 @@ static void	process_command(t_token **head, t_env **env, int *last_exit_code)
 		terminate_dll(head);
 		return ;
 	}
-	handle_redirections(*head);
-	*last_exit_code = execute_ast(ast, env);
-	exit_code_str = ft_itoa(*last_exit_code);
-	if (exit_code_str)
+	if (handle_redirections(*head) == -1)
 	{
-		env_set(env, "?", exit_code_str);
-		free(exit_code_str);
+		*last_exit_code = 2;
+		set_exit_code(env, *last_exit_code);
+		close_all_fds(*head);
+		terminate_dll(head);
+		return ;
 	}
+	*last_exit_code = execute_ast(ast, env);
+	set_exit_code(env, *last_exit_code);
 	close_all_fds(*head);
 	terminate_dll(head);
 }
@@ -78,15 +77,9 @@ static int	run_shell_loop(t_env **env)
 	int		last_exit_code;
 	int		ret;
 	int		action;
-	char	*exit_code_str;
 
 	last_exit_code = 0;
-	exit_code_str = ft_itoa(0);
-	if (exit_code_str)
-	{
-		env_set(env, "?", exit_code_str);
-		free(exit_code_str);
-	}
+	init_shell_env(env);
 	while (1)
 	{
 		head = NULL;

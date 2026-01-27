@@ -71,9 +71,16 @@ int	execute_command(t_ast *node, t_env **env)
 {
 	if (!node)
 		return (-1);
-	if (!node->cmd_args || !node->cmd_args[0] || node->cmd_args[0][0] == '\0')
+	if (!node->cmd_args || !node->cmd_args[0])
 	{
 		apply_prefix_env(env, node->prefix_env);
+		return (0);
+	}
+	if (node->cmd_args[0][0] == '\0')
+	{
+		apply_prefix_env(env, node->prefix_env);
+		if (node->cmd_args[1])
+			return (127);
 		return (0);
 	}
 	if (is_builtin(node->cmd_args[0]))
