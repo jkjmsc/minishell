@@ -10,10 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../environment/env.h"
-#include "ast.h"
 #include "../builtin/builtin.h"
+#include "../environment/env.h"
 #include "../utils/utils.h"
+#include "ast.h"
+
 /*
 ** we need to know the numbers of tokens
 ** between 2 segment (start-> end) for argv
@@ -53,20 +54,24 @@ char	*expand_token(char *token, t_env *env)
 */
 char	**tokens_to_argv(t_token *start, t_token *end, t_env *env)
 {
-	int		n;
 	char	**argv;
 	int		i;
+	int		n;
 	t_token	*current;
 
-	n = count_tokens_range(start, end);
-	argv = NULL;
+	current = start;
+	while (current && current != end->next && is_assignment(current->value))
+		current = current->next;
+	n = 0;
+	start = current;
+	while (current && current != end->next && ++n)
+		current = current->next;
+	safe_malloc((void **)&argv, sizeof(char *) * (n + 1));
 	i = 0;
 	current = start;
-	safe_malloc((void **)&argv, sizeof(char *) * (n + 1));
-	while (current != end->next)
+	while (current && current != end->next)
 	{
-		if (!is_assignment(current->value))
-			argv[i++] = expand_token(current->value, env);
+		argv[i++] = expand_token(current->value, env);
 		current = current->next;
 	}
 	argv[i] = NULL;

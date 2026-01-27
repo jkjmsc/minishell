@@ -61,22 +61,24 @@ int	is_builtin(char *cmd)
 int	execute_builtin(t_ast *node, t_env **env)
 {
 	char	*cmd;
+	int		argc;
 
+	argc = count_argv(node->cmd_args);
 	if (!node || !node->cmd_args || !node->cmd_args[0])
 		return (1);
 	cmd = node->cmd_args[0];
 	if (ft_strncmp(cmd, "pwd", 4) == 0)
 		return (ft_pwd());
 	if (ft_strncmp(cmd, "cd", 3) == 0)
-		return (ft_cd(count_argv(node->cmd_args), node->cmd_args, env));
+		return (ft_cd(argc, node->cmd_args, env));
 	if (ft_strncmp(cmd, "echo", 5) == 0)
 		return (ft_echo(node->cmd_args));
 	if (ft_strncmp(cmd, "env", 4) == 0)
-		return (ft_env(*env));
+		return (ft_env(*env, argc, node->cmd_args));
 	if (ft_strncmp(cmd, "exit", 5) == 0)
-		return (ft_exit(NULL, count_argv(node->cmd_args), node->cmd_args));
+		return (ft_exit(NULL, argc, node->cmd_args));
 	if (ft_strncmp(cmd, "export", 7) == 0)
-		return (ft_export(count_argv(node->cmd_args), node->cmd_args, env));
+		return (ft_export(argc, node->cmd_args, env));
 	if (ft_strncmp(cmd, "unset", 6) == 0)
 		return (ft_unset(node->cmd_args, env));
 	return (1);

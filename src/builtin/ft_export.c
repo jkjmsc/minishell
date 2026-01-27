@@ -83,14 +83,14 @@ static void	print_export_env(t_env *env)
 	free(tab);
 }
 
-static void	process_export_arg(const char *arg, char *cmd, t_env **env)
+static int	process_export_arg(const char *arg, char *cmd, t_env **env)
 {
 	char	*key;
 	char	*value;
 	char	*equal_sign;
 
 	if (!is_valid_identifier(arg))
-		return (builtin_error(NOT_A_VALID_IDENTIFIER, cmd, (char *)arg));
+		return (builtin_error(NOT_A_VALID_IDENTIFIER, cmd, (char *)arg), 1);
 	equal_sign = ft_strchr(arg, '=');
 	if (equal_sign)
 	{
@@ -100,16 +100,22 @@ static void	process_export_arg(const char *arg, char *cmd, t_env **env)
 		free(key);
 		free(value);
 	}
+	return (0);
 }
 
 int	ft_export(int argc, char **argv, t_env **env)
 {
 	int	i;
+	int	status;
 
+	status = 0;
 	if (argc == 1)
 		return (print_export_env(*env), 0);
 	i = 1;
 	while (argv[i])
-		process_export_arg(argv[i++], argv[0], env);
-	return (0);
+	{
+		if (process_export_arg(argv[i++], argv[0], env) != 0)
+			status = 1;
+	}
+	return (status);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: radandri <radandri@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 18:46:04 by jkarippa          #+#    #+#             */
-/*   Updated: 2026/01/21 18:35:32 by codespace        ###   ########.fr       */
+/*   Updated: 2026/01/21 18:35:32 by radandri        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ static int	handle_eof_and_continue(int ret)
 	return (0);
 }
 
-static void	process_command(t_token **head, t_env **env)
+static void	process_command(t_token **head, t_env **env, int *last_exit_code)
 {
 	t_ast	*ast;
 	t_token	*tail;
@@ -60,7 +60,7 @@ static void	process_command(t_token **head, t_env **env)
 		return ;
 	}
 	handle_redirections(*head);
-	execute_ast(ast, env);
+	*last_exit_code = execute_ast(ast, env);
 	close_all_fds(*head);
 	terminate_dll(head);
 }
@@ -70,7 +70,9 @@ static int	run_shell_loop(t_env **env)
 	t_token	*head;
 	int		ret;
 	int		action;
+	int		last_exit_code;
 
+	last_exit_code = 0;
 	while (1)
 	{
 		head = NULL;
@@ -85,11 +87,11 @@ static int	run_shell_loop(t_env **env)
 			if (action == 1)
 				continue ;
 		}
-		process_command(&head, env);
+		process_command(&head, env, &last_exit_code);
 	}
 	terminate_dll(&head);
 	clear_history();
-	return (0);
+	return (last_exit_code);
 }
 
 int	main(int ac, char **argv, char **envp)

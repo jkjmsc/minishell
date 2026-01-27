@@ -26,11 +26,11 @@ int	execute_pipe(t_ast *node, t_env **env)
 	if (pipe(fd) == -1)
 		return (perror("pipe"), 1);
 	p = (t_pipe_params){node->left, env, fd[1], STDOUT_FILENO};
-	spawn_pipe_child(&pids[0], &p);
+	spawn_pipe_child(&pids[0], &p, fd[0]);
 	if (pids[0] < 0)
 		return (perror("fork"), close(fd[0]), close(fd[1]), 1);
 	p = (t_pipe_params){node->right, env, fd[0], STDIN_FILENO};
-	spawn_pipe_child(&pids[1], &p);
+	spawn_pipe_child(&pids[1], &p, fd[1]);
 	if (pids[1] < 0)
 		return (perror("fork"), close(fd[0]), close(fd[1]), 1);
 	close(fd[0]);

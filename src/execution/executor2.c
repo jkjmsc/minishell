@@ -43,5 +43,9 @@ int	execute_forked_command(t_ast *node, t_env **env)
 	}
 	if (waitpid(pid, &status, 0) == -1)
 		return (perror("waitpid"), -1);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	if (WIFSIGNALED(status))
+		return (128 + WTERMSIG(status));
 	return (status);
 }

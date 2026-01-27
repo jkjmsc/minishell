@@ -15,7 +15,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-void	spawn_pipe_child(pid_t *pid, t_pipe_params *p)
+void	spawn_pipe_child(pid_t *pid, t_pipe_params *p, int unused_fd)
 {
 	*pid = fork();
 	if (*pid == 0)
@@ -25,6 +25,7 @@ void	spawn_pipe_child(pid_t *pid, t_pipe_params *p)
 		if (dup2(p->pipe_fd, p->target_fd) == -1)
 			perror("dup2");
 		close(p->pipe_fd);
+		close(unused_fd);
 		exit(execute_ast(p->node, p->env));
 	}
 }

@@ -1,0 +1,73 @@
+name: CI/CD - Build, Test
+
+on:
+  push:
+    branches: [ main,master ]
+  pull_request:
+    branches: [ main,master ]
+  workflow_dispatch:
+
+jobs:
+  norminette:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+      - name: Install Norminette
+        run: |
+          if ! command -v norminette &> /dev/null; then
+            python3 -m pip install --upgrade pip
+            python3 -m pip install norminette
+          fi
+      - name: Run norminette
+        run: |
+          echo "Current dir: $(pwd)"
+          echo "ls -l command:\n$(ls -l)"
+          norminette $(find . -type f \( -name "*.c" -o -name "*.h" \))
+          
+  valgrind-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreadline-dev
+
+      - name: Build minishell
+        run: |
+          make re
+      - name: Run valgrind
+        id: valgrind
+        run: |
+          echo "Running Valgrind memory leak check..."
+          valgrind --leak-check=full --error-exitcode=42 --show-leak-kinds=all \
+          --track-origin=yes ./minishell -c "exit" > output.log 2> valgrind.log || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -eq 42 ]; then
+            echo "❌ Memory leaks detected!"
+            echo "----- Valgrind  Output -----"
+            cat valgrind.log
+            echo "----------------------------"
+            exit 1
+          else
+            echo "✅ No memory leaks detected!"
+            echo "Valgrind completed successfully."
+          fi
+      - name: Upload logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valgrind-logs
+          path: |
+            valgrind.log
+            output.log

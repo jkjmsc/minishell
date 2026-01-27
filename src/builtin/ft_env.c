@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../errors/errors.h"
 #include "builtin.h"
 
 /*
@@ -20,13 +21,21 @@
 **   HOME=/home/user
 **   SHLVL=2
 */
-int	ft_env(t_env *env)
+int	ft_env(t_env *env, int argc, char **argv)
 {
-	while (env)
+	if (argc == 1)
 	{
-		if (env->value)
-			printf("%s=%s\n", env->key, env->value);
-		env = env->next;
+		while (env)
+		{
+			if (env->value)
+				printf("%s=%s\n", env->key, env->value);
+			env = env->next;
+		}
+	}
+	else
+	{
+		builtin_error(NO_SUCH_FILE_DIRECTORY, "env", argv[1]);
+		return (127);
 	}
 	return (0);
 }

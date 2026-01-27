@@ -22,7 +22,7 @@
 int		count_argv(char **argv);
 int		ft_exit(t_token *head, int argc, char **argv);
 int		ft_echo(char **argv);
-int		ft_env(t_env *env);
+int		ft_env(t_env *env, int argc, char **argv);
 int		ft_pwd(void);
 int		ft_unset(char **args, t_env **env);
 int		ft_cd(int argc, char **argv, t_env **envp);

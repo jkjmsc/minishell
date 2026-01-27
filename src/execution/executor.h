@@ -58,7 +58,7 @@ typedef struct s_pipe_params
 	int		target_fd;
 }			t_pipe_params;
 
-void		spawn_pipe_child(pid_t *pid, t_pipe_params *p);
+void		spawn_pipe_child(pid_t *pid, t_pipe_params *p, int unused_fd);
 int			wait_pipe_children(pid_t left_pid, pid_t right_pid);
 
 #endif

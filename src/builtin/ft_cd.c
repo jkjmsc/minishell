@@ -18,9 +18,14 @@
 #include <string.h>
 #include <unistd.h>
 
-static int	cd_error(char *msg, char *oldpwd)
+static int	cd_error(char *msg, char *cmd, char *oldpwd)
 {
 	ft_putstr_fd("minishell: cd: ", 2);
+	if (cmd)
+	{
+		ft_putstr_fd(cmd, 2);
+		ft_putstr_fd(": ", 2);
+	}
 	ft_putendl_fd(msg, 2);
 	if (oldpwd)
 		free(oldpwd);
@@ -90,17 +95,17 @@ int	ft_cd(int argc, char **argv, t_env **envp)
 	int		should_free;
 
 	if (argc > 2)
-		return (cd_error("too many arguments", NULL));
+		return (cd_error("too many arguments", NULL, NULL));
 	oldpwd = getcwd(NULL, 0);
 	path = get_target_path(argc, argv, *envp);
 	if (!path)
-		return (cd_error("HOME not set", oldpwd));
+		return (cd_error("HOME not set", NULL, oldpwd));
 	should_free = (argc > 1 && argv[1][0] == '~' && path != argv[1]);
 	if (chdir(path) != 0)
 	{
 		if (should_free)
 			free(path);
-		return (cd_error(strerror(errno), oldpwd));
+		return (cd_error(strerror(errno), argv[1], oldpwd));
 	}
 	update_pwd_vars(envp, oldpwd);
 	free(oldpwd);
