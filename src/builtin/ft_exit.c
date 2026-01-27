@@ -12,6 +12,7 @@
 
 #include "../tokenization/token.h"
 #include "builtin.h"
+#include <unistd.h>
 
 static int	is_numeric(const char *s)
 {
@@ -36,11 +37,37 @@ static int	is_numeric(const char *s)
 ** If yes, print exit message and return 1 (signal to exit shell).
 ** Otherwise return 0 (continue normal processing).
 */
+static unsigned char	parse_exit_code(const char *str)
+{
+	unsigned long long	code;
+	int					i;
+	int					sign;
+
+	i = 0;
+	code = 0;
+	sign = 1;
+	if (str[0] == '+' || str[0] == '-')
+	{
+		if (str[0] == '-')
+			sign = -1;
+		i++;
+	}
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		code = code * 10 + (str[i++] - '0');
+	}
+	code = code % 256;
+	if (sign == -1)
+		return ((256 - code) % 256);
+	return (code);
+}
+
 int	ft_exit(t_token *head, int argc, char **argv)
 {
-	int	exit_code;
+	unsigned char	exit_code;
 
-	printf("exit\n");
+	if (isatty(STDIN_FILENO))
+		printf("exit\n");
 	if (argc == 1)
 		exit(0);
 	if (argc > 2)
@@ -53,13 +80,12 @@ int	ft_exit(t_token *head, int argc, char **argv)
 		ft_putstr_fd("minishell: exit: numeric argument required\n", 2);
 		exit(2);
 	}
-	if (head == NULL)
-		return (0);
-	if (head->type == CMD && ft_strncmp(head->value, "exit", 5) == 0)
+	if (head && head->type == CMD && ft_strncmp(head->value, "exit", 5) == 0)
 	{
 		terminate_dll(&head);
-		return (1);
+		exit_code = parse_exit_code(argv[1]);
+		exit(exit_code);
 	}
-	exit_code = ft_atoi(argv[1]);
-	exit(exit_code % 256);
+	exit_code = parse_exit_code(argv[1]);
+	exit(exit_code);
 }

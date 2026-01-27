@@ -13,59 +13,82 @@
 #include "token.h"
 
 /*
+** Remove all quote pairs from a string, handling mixed quoted/unquoted content.
+** Processes strings like ""X or ""$?"" by removing all quote pairs.
+*/
+static void	remove_quotes_loop(const char *str, char *result, int *j)
+{
+	int		i;
+	char	quote_char;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '"' || str[i] == '\'')
+		{
+			quote_char = str[i++];
+			while (str[i] && str[i] != quote_char)
+				result[(*j)++] = str[i++];
+			if (str[i] == quote_char)
+				i++;
+		}
+		else
+			result[(*j)++] = str[i++];
+	}
+}
+
+char	*remove_all_quotes(const char *str)
+{
+	char	*result;
+	int		j;
+
+	if (!str)
+		return (NULL);
+	result = (char *)malloc(ft_strlen(str) + 1);
+	if (!result)
+		return (NULL);
+	j = 0;
+	remove_quotes_loop(str, result, &j);
+	result[j] = '\0';
+	return (result);
+}
+
+/*
 ** Remove only the outermost matching double quotes if they enclose the string.
 ** This preserves single quotes inside double quotes (bash behavior).
+** Calls remove_all_quotes to handle mixed quoted/unquoted content.
 */
 void	remove_dquote(char **buffer)
 {
-	char	*str;
-	int		len;
-	int		i;
-	int		j;
+	char	*new_str;
 
 	if (!buffer || !*buffer)
 		return ;
-	str = *buffer;
-	len = ft_strlen(str);
-	if (len < 2 || str[0] != '\"' || str[len - 1] != '\"')
-		return ;
-	i = 1;
-	j = 0;
-	while (i < len - 1)
+	new_str = remove_all_quotes(*buffer);
+	if (new_str)
 	{
-		str[j] = str[i];
-		i++;
-		j++;
+		free(*buffer);
+		*buffer = new_str;
 	}
-	str[j] = '\0';
 }
 
 /*
 ** Remove only the outermost matching single quotes if they enclose the string.
 ** This preserves everything else literally (bash behavior).
+** Calls remove_all_quotes to handle mixed quoted/unquoted content.
 */
 void	remove_quote(char **buffer)
 {
-	char	*str;
-	int		len;
-	int		i;
-	int		j;
+	char	*new_str;
 
 	if (!buffer || !*buffer)
 		return ;
-	str = *buffer;
-	len = ft_strlen(str);
-	if (len < 2 || str[0] != '\'' || str[len - 1] != '\'')
-		return ;
-	i = 1;
-	j = 0;
-	while (i < len - 1)
+	new_str = remove_all_quotes(*buffer);
+	if (new_str)
 	{
-		str[j] = str[i];
-		i++;
-		j++;
+		free(*buffer);
+		*buffer = new_str;
 	}
-	str[j] = '\0';
 }
 
 /*

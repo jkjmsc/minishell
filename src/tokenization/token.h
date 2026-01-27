@@ -61,6 +61,7 @@ int					count_no_of_char(const char *buffer);
 void				print_tokens(t_token *head);
 void				remove_quote(char **buffer);
 void				remove_dquote(char **buffer);
+char				*remove_all_quotes(const char *str);
 void				terminate_dll(t_token **token);
 int					count_char(const char *buffer, const char c);
 int					get_operator_len(char c1, char c2);

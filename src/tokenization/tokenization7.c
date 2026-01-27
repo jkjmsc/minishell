@@ -16,6 +16,25 @@
 static int	handle_normal_segment(t_tok_ctx *ctx);
 static int	handle_copy_and_link(t_tok_ctx *ctx, int len);
 
+static void	apply_quote_removal(char **tmp, char quote)
+{
+	char	*processed_tmp;
+
+	if (quote == '\'')
+		remove_quote(tmp);
+	else if (quote == '"')
+		remove_dquote(tmp);
+	else if (*tmp && (ft_strchr(*tmp, '"') || ft_strchr(*tmp, '\'')))
+	{
+		processed_tmp = remove_all_quotes(*tmp);
+		if (processed_tmp)
+		{
+			free(*tmp);
+			*tmp = processed_tmp;
+		}
+	}
+}
+
 int	create_and_link_token(t_token **head, t_token **prev, char *tmp, int idx)
 {
 	t_token	*nxt;
@@ -24,10 +43,7 @@ int	create_and_link_token(t_token **head, t_token **prev, char *tmp, int idx)
 	quote = 0;
 	if (tmp && (tmp[0] == '\'' || tmp[0] == '"'))
 		quote = tmp[0];
-	if (quote == '\'')
-		remove_quote(&tmp);
-	else if (quote == '"')
-		remove_dquote(&tmp);
+	apply_quote_removal(&tmp, quote);
 	tmp = mark_tmp_if_needed(tmp, quote != 0);
 	if (!tmp)
 		return (1);

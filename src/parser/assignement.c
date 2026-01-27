@@ -64,18 +64,34 @@ int	split_key_value_assignment(const char *token, char **key, char **value)
 	return (0);
 }
 
+static char	*get_var_name(const char *value, int *i)
+{
+	char	*var;
+	int		start;
+
+	start = ++(*i);
+	if (value[start] == '?')
+	{
+		(*i)++;
+		var = ft_strdup("?");
+	}
+	else
+	{
+		while (ft_isalnum(value[*i]) || value[*i] == '_')
+			(*i)++;
+		var = ft_substr(value, start, *i - start);
+	}
+	return (var);
+}
+
 static char	*expand_and_join(char *result, const char *value, int *i,
 		t_env *env)
 {
 	char	*var;
 	char	*tmp;
 	char	*var_value;
-	int		start;
 
-	start = ++(*i);
-	while (ft_isalnum(value[*i]) || value[*i] == '_')
-		(*i)++;
-	var = ft_substr(value, start, *i - start);
+	var = get_var_name(value, i);
 	if (!var)
 		return (free(result), NULL);
 	var_value = env_get(env, var);
@@ -113,8 +129,8 @@ char	*expand_value(const char *value, t_env *env)
 	i = 0;
 	while (value[i])
 	{
-		if (value[i] == '$' && (ft_isalpha(value[i + 1]) || value[i
-					+ 1] == '_'))
+		if (value[i] == '$' && (ft_isalpha(value[i + 1]) || value[i + 1] == '_'
+				|| value[i + 1] == '?'))
 			tmp = expand_and_join(result, value, &i, env);
 		else
 			tmp = append_char(result, value[i++]);

@@ -46,6 +46,7 @@ static void	process_command(t_token **head, t_env **env, int *last_exit_code)
 {
 	t_ast	*ast;
 	t_token	*tail;
+	char	*exit_code_str;
 
 	if (validate_token_list(*head))
 	{
@@ -61,6 +62,12 @@ static void	process_command(t_token **head, t_env **env, int *last_exit_code)
 	}
 	handle_redirections(*head);
 	*last_exit_code = execute_ast(ast, env);
+	exit_code_str = ft_itoa(*last_exit_code);
+	if (exit_code_str)
+	{
+		env_set(env, "?", exit_code_str);
+		free(exit_code_str);
+	}
 	close_all_fds(*head);
 	terminate_dll(head);
 }
@@ -68,11 +75,18 @@ static void	process_command(t_token **head, t_env **env, int *last_exit_code)
 static int	run_shell_loop(t_env **env)
 {
 	t_token	*head;
+	int		last_exit_code;
 	int		ret;
 	int		action;
-	int		last_exit_code;
+	char	*exit_code_str;
 
 	last_exit_code = 0;
+	exit_code_str = ft_itoa(0);
+	if (exit_code_str)
+	{
+		env_set(env, "?", exit_code_str);
+		free(exit_code_str);
+	}
 	while (1)
 	{
 		head = NULL;
@@ -80,12 +94,11 @@ static int	run_shell_loop(t_env **env)
 		if (ret != 0)
 		{
 			action = handle_token_ret(ret, &head);
-			if (action == -1)
-				break ;
 			if (action == 1 && handle_eof_and_continue(ret))
 				break ;
-			if (action == 1)
-				continue ;
+			if (action != 1)
+				break ;
+			continue ;
 		}
 		process_command(&head, env, &last_exit_code);
 	}

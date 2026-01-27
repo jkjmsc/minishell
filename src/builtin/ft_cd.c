@@ -78,12 +78,17 @@ static char	*get_target_path(int argc, char **argv, t_env *env)
 
 	if (argc == 1)
 		return (env_get(env, "HOME"));
-	if (ft_strncmp(argv[1], "-", 2) == 0)
+	if (argv[1][0] == '-' && (argv[1][1] == '\0' || 
+			(argv[1][1] == '-' && argv[1][2] == '\0')))
 	{
-		path = env_get(env, "OLDPWD");
-		if (path)
-			ft_putendl_fd(path, 1);
-		return (path);
+		if (argv[1][1] == '\0')
+		{
+			path = env_get(env, "OLDPWD");
+			if (path)
+				ft_putendl_fd(path, 1);
+			return (path);
+		}
+		return (env_get(env, "HOME"));
 	}
 	return (expand_tilde(argv[1], env));
 }
