@@ -16,23 +16,30 @@
 static int	handle_normal_segment(t_tok_ctx *ctx);
 static int	handle_copy_and_link(t_tok_ctx *ctx, int len);
 
-static void	apply_quote_removal(char **tmp, char quote)
+static int	is_single_quoted(const char *str)
 {
-	char	*processed_tmp;
+	size_t	len;
+	size_t	i;
 
-	if (quote == '\'')
-		remove_quote(tmp);
-	else if (quote == '"')
-		remove_dquote(tmp);
-	else if (*tmp && (ft_strchr(*tmp, '"') || ft_strchr(*tmp, '\'')))
+	if (!str)
+		return (0);
+	len = ft_strlen(str);
+	if (len < 2)
+		return (0);
+	if (str[0] != '\'' && str[0] != '"')
+		return (0);
+	if (str[0] != str[len - 1])
+		return (0);
+	if (str[0] == '\'')
 	{
-		processed_tmp = remove_all_quotes(*tmp);
-		if (processed_tmp)
-		{
-			free(*tmp);
-			*tmp = processed_tmp;
-		}
+		i = 1;
+		while (str[i] && str[i] != '\'')
+			i++;
+		return (str[i] == '\'' && i == len - 1);
 	}
+	if (str[0] == '"')
+		return (str[len - 1] == '"');
+	return (0);
 }
 
 int	create_and_link_token(t_token **head, t_token **prev, char *tmp, int idx)
@@ -41,10 +48,18 @@ int	create_and_link_token(t_token **head, t_token **prev, char *tmp, int idx)
 	char	quote;
 
 	quote = 0;
-	if (tmp && (tmp[0] == '\'' || tmp[0] == '"'))
-		quote = tmp[0];
-	apply_quote_removal(&tmp, quote);
-	tmp = mark_tmp_if_needed(tmp, quote != 0);
+	if (tmp && is_single_quoted(tmp))
+	{
+		if (tmp[0] == '\'')
+			quote = '\'';
+		else if (tmp[0] == '"')
+			quote = '"';
+	}
+	if (quote == '\'')
+		remove_quote(&tmp);
+	else if (quote == '"')
+		remove_dquote(&tmp);
+	tmp = mark_tmp_if_needed(tmp, quote);
 	if (!tmp)
 		return (1);
 	node_info(idx, tmp, &nxt, prev);

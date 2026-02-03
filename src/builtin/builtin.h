@@ -14,18 +14,23 @@
 # define BUILTIN_H
 
 # include "../environment/env.h"
+# include "../minishell.h"
 # include "../utils/utils.h"
 
 /*
 ** Builtin command declarations
 */
 int		count_argv(char **argv);
-int		ft_exit(t_token *head, int argc, char **argv);
+int		ft_exit(int argc, char **argv);
 int		ft_echo(char **argv);
 int		ft_env(t_env *env, int argc, char **argv);
 int		ft_pwd(void);
 int		ft_unset(char **args, t_env **env);
 int		ft_cd(int argc, char **argv, t_env **envp);
-int		ft_export(int argc, char **argv, t_env **env);
+int		ft_export(int argc, char **argv, t_minishell *minishell);
 char	*expand_tilde(char *path, t_env *env);
+void	print_export_env(t_env *env);
+void	sort_env_tab(char **env);
+void	handle_export_append(const char *arg, char *equal_sign, t_env **env);
+void	handle_export_assign(const char *arg, char *equal_sign, t_env **env);
 #endif

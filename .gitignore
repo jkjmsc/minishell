@@ -1,0 +1,34 @@
+# Compiled objects and executables
+*.o
+*.a
+*.so
+*.out
+
+# Executable
+minishell
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Debug files
+*.dSYM/
+*.su
+*.gch
+*.gchp
+
+# Build directories
+build/
+dist/
+
+# Temporary files
+*.tmp
+.tmp/

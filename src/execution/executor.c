@@ -11,22 +11,25 @@
 /* ************************************************************************** */
 
 #include "../environment/env.h"
-#include "executor.h"
 #include "../utils/utils.h"
+#include "executor.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 char	*get_cmd_path(char *cmd, t_env *env)
 {
-	if (cmd[0] == '/' || cmd[0] == '.')
+	struct stat	stat_buf;
+
+	if ((cmd[0] == '/' || cmd[0] == '.') && stat(cmd, &stat_buf) == 0)
 		return (cmd);
 	return (find_path(cmd, env));
 }
 
-void	apply_prefix_env(t_env **env, char **prefix_env)
+void	apply_prefix_env(t_minishell *minishell, char **prefix_env)
 {
 	int		i;
 	char	*key;
@@ -40,10 +43,10 @@ void	apply_prefix_env(t_env **env, char **prefix_env)
 	{
 		if (split_key_value_assignment(prefix_env[i], &key, &value) == 0)
 		{
-			expanded = expand_value(value, *env);
+			expanded = expand_value(value, minishell);
 			if (expanded)
 			{
-				process_compound_assignment(env, prefix_env[i], key,
+				process_compound_assignment(&minishell->env, prefix_env[i], key,
 					expanded);
 				free(expanded);
 			}
@@ -54,11 +57,10 @@ void	apply_prefix_env(t_env **env, char **prefix_env)
 	}
 }
 
-void	exec_child(char **cmd_args, char *path, t_env **env)
+void	exec_child(char **cmd_args, char *path, t_minishell *minishell)
 {
-	execve(path, cmd_args, env_to_array(*env));
-	perror("execve");
-	exit(1);
+	execve(path, cmd_args, env_to_array(minishell->env));
+	exec_child_error(path);
 }
 
 void	reset_child_signals(void)
@@ -67,23 +69,16 @@ void	reset_child_signals(void)
 	signal(SIGQUIT, SIG_DFL);
 }
 
-int	execute_command(t_ast *node, t_env **env)
+int	execute_command(t_ast *node, t_minishell *minishell)
 {
 	if (!node)
 		return (-1);
 	if (!node->cmd_args || !node->cmd_args[0])
 	{
-		apply_prefix_env(env, node->prefix_env);
-		return (0);
-	}
-	if (node->cmd_args[0][0] == '\0')
-	{
-		apply_prefix_env(env, node->prefix_env);
-		if (node->cmd_args[1])
-			return (127);
+		apply_prefix_env(minishell, node->prefix_env);
 		return (0);
 	}
 	if (is_builtin(node->cmd_args[0]))
-		return (execute_builtin(node, env));
-	return (execute_forked_command(node, env));
+		return (execute_builtin(node, minishell));
+	return (execute_forked_command(node, minishell));
 }

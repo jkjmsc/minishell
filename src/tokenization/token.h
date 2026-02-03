@@ -61,14 +61,13 @@ int					count_no_of_char(const char *buffer);
 void				print_tokens(t_token *head);
 void				remove_quote(char **buffer);
 void				remove_dquote(char **buffer);
-char				*remove_all_quotes(const char *str);
 void				terminate_dll(t_token **token);
 int					count_char(const char *buffer, const char c);
 int					get_operator_len(char c1, char c2);
 int					get_operator_len_quoted(char *token, int pos);
 char				*alloc_copy_token(char *token, int start, int len);
 void				advance_past_quote(char *token, int *i);
-char				*mark_tmp_if_needed(char *tmp, int quoted);
+char				*mark_tmp_if_needed(char *tmp, char quote);
 int					create_and_link_token(t_token **head, t_token **prev,
 						char *tmp, int idx);
 int					process_token_string(t_token **head, t_token **prev,

@@ -58,7 +58,7 @@ int	is_builtin(char *cmd)
 ** Returns exit status of the builtin
 ** Commands: echo, cd, pwd, export, unset, env, exit
 */
-int	execute_builtin(t_ast *node, t_env **env)
+int	execute_builtin(t_ast *node, t_minishell *minishell)
 {
 	char	*cmd;
 	int		argc;
@@ -70,16 +70,16 @@ int	execute_builtin(t_ast *node, t_env **env)
 	if (ft_strncmp(cmd, "pwd", 4) == 0)
 		return (ft_pwd());
 	if (ft_strncmp(cmd, "cd", 3) == 0)
-		return (ft_cd(argc, node->cmd_args, env));
+		return (ft_cd(argc, node->cmd_args, &minishell->env));
 	if (ft_strncmp(cmd, "echo", 5) == 0)
 		return (ft_echo(node->cmd_args));
 	if (ft_strncmp(cmd, "env", 4) == 0)
-		return (ft_env(*env, argc, node->cmd_args));
+		return (ft_env(minishell->env, argc, node->cmd_args));
 	if (ft_strncmp(cmd, "exit", 5) == 0)
-		return (ft_exit(NULL, argc, node->cmd_args));
+		return (ft_exit(argc, node->cmd_args));
 	if (ft_strncmp(cmd, "export", 7) == 0)
-		return (ft_export(argc, node->cmd_args, env));
+		return (ft_export(argc, node->cmd_args, minishell));
 	if (ft_strncmp(cmd, "unset", 6) == 0)
-		return (ft_unset(node->cmd_args, env));
+		return (ft_unset(node->cmd_args, &minishell->env));
 	return (1);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_cd.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: radandri <radandri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/27 21:21:42 by radandri          #+#    #+#             */
-/*   Updated: 2026/01/27 19:33:17 by codespace        ###   ########.fr       */
+/*   Updated: 2026/01/21 00:21:36 by radandri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,34 +72,46 @@ char	*expand_tilde(char *path, t_env *env)
 	return (path);
 }
 
+/*
+** Return the target path for cd:
+** - no args -> HOME
+** - "--" indicates end of options: "cd --" -> HOME, "cd -- dir" -> dir
+** - "-" -> OLDPWD (printed)
+*/
 static char	*get_target_path(int argc, char **argv, t_env *env)
 {
 	char	*path;
 
 	if (argc == 1)
 		return (env_get(env, "HOME"));
-	if (argv[1][0] == '-' && (argv[1][1] == '\0' || (argv[1][1] == '-'
-				&& argv[1][2] == '\0')))
+	if (argc >= 2 && ft_strcmp(argv[1], "--") == 0)
 	{
-		if (argv[1][1] == '\0')
-		{
-			path = env_get(env, "OLDPWD");
-			if (path)
-				ft_putendl_fd(path, 1);
-			return (path);
-		}
-		return (env_get(env, "HOME"));
+		if (argc == 2)
+			return (env_get(env, "HOME"));
+		return (expand_tilde(argv[2], env));
+	}
+	if (ft_strncmp(argv[1], "-", 2) == 0)
+	{
+		path = env_get(env, "OLDPWD");
+		if (path)
+			ft_putendl_fd(path, 1);
+		return (path);
 	}
 	return (expand_tilde(argv[1], env));
 }
 
+/*
+** cd builtin:
+** - rejects too many arguments (except "cd -- dir")
+** - updates PWD and OLDPWD on success
+*/
 int	ft_cd(int argc, char **argv, t_env **envp)
 {
 	char	*path;
 	char	*oldpwd;
 	int		should_free;
 
-	if (argc > 2)
+	if (argc > 2 && !(argc == 3 && ft_strcmp(argv[1], "--") == 0))
 		return (cd_error("too many arguments", NULL, NULL));
 	oldpwd = getcwd(NULL, 0);
 	path = get_target_path(argc, argv, *envp);

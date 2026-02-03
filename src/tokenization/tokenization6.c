@@ -12,12 +12,23 @@
 
 #include "token.h"
 
+#define MARKER_DOUBLE_QUOTE '\x01'
+#define MARKER_SINGLE_QUOTE '\x02'
+
+/*
+** Return operator length:
+**  - 2 for two-character operators: << >> || && >|
+**  - 1 for single character operators: | & ( ) < >
+**  - 0 if no operator at position
+*/
 int	get_operator_len(char c1, char c2)
 {
-	if ((c1 == '<' && c2 == '<') || (c1 == '>' && c2 == '>') || (c1 == '|'
-			&& c2 == '|') || (c1 == '&' && c2 == '&'))
+	if ((c1 == '<' && c2 == '<') || (c1 == '>' && c2 == '>')
+		|| (c1 == '|' && c2 == '|') || (c1 == '&' && c2 == '&')
+		|| (c1 == '>' && c2 == '|'))
 		return (2);
-	if (c1 == '<' || c1 == '>' || c1 == '|' || c1 == '&')
+	if (c1 == '|' || c1 == '&' || c1 == '(' || c1 == ')' || c1 == '<'
+		|| c1 == '>')
 		return (1);
 	return (0);
 }
@@ -84,13 +95,17 @@ void	advance_past_quote(char *token, int *i)
 /*
 ** helper: add marker to quoted segment
 ** (returns new pointer or NULL on error)
+** quote: 0 for unquoted, '\'' for single quotes, '"' for double quotes
 */
-char	*mark_tmp_if_needed(char *tmp, int quoted)
+char	*mark_tmp_if_needed(char *tmp, char quote)
 {
 	char	*marked;
 	size_t	len;
+	char	marker;
 
-	if (!quoted || !tmp || tmp[0] == '\0')
+	if (!quote || !tmp || tmp[0] == '\0')
+		return (tmp);
+	if (quote != '\'' && quote != '"')
 		return (tmp);
 	len = ft_strlen(tmp);
 	if (safe_malloc((void **)&marked, len + 2))
@@ -98,7 +113,11 @@ char	*mark_tmp_if_needed(char *tmp, int quoted)
 		free(tmp);
 		return (NULL);
 	}
-	marked[0] = '\x01';
+	if (quote == '\'')
+		marker = MARKER_SINGLE_QUOTE;
+	else
+		marker = MARKER_DOUBLE_QUOTE;
+	marked[0] = marker;
 	ft_memcpy(marked + 1, tmp, len + 1);
 	free(tmp);
 	return (marked);

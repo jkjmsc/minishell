@@ -1,36 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_unset.c                                         :+:      :+:    :+:   */
+/*   errors.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: radandri <radandri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/16 13:16:36 by radandri          #+#    #+#             */
-/*   Updated: 2025/12/16 13:33:23 by radandri         ###   ########.fr       */
+/*   Created: 2026/01/16 06:30:45 by radandri          #+#    #+#             */
+/*   Updated: 2026/01/16 06:30:47 by radandri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../errors/errors.h"
-#include "builtin.h"
+#ifndef MINISHELL_H
+# define MINISHELL_H
 
-static int	is_invalid_option(const char *arg)
+typedef struct s_env	t_env;
+
+typedef struct s_minishell
 {
-	if (arg[0] == '-' && arg[1] != '\0')
-		return (1);
-	return (0);
-}
+	t_env				*env;
+	int					last_exit_code;
+}						t_minishell;
 
-int	ft_unset(char **args, t_env **env)
-{
-	int	i;
-
-	i = 1;
-	while (args[i])
-	{
-		if (is_invalid_option(args[i]))
-			return (builtin_error(INVALID_OPTION, args[0], args[i]), 2);
-		*env = env_remove(*env, args[i]);
-		i++;
-	}
-	return (0);
-}
+#endif

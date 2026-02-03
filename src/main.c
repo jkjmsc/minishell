@@ -12,74 +12,74 @@
 
 #include "environment/env.h"
 #include "execution/executor.h"
+#include "minishell.h"
+#include "main_helpers.h"
 #include "parser/ast.h"
 #include "signal_handling/signal_handle.h"
 #include "tokenization/token.h"
 #include "utils/utils.h"
 
-static int	handle_token_ret(int ret, t_token **head)
+/*
+** Move a single leading redirection and its filename after the following
+** command segment. Returns 1 on success, 0 otherwise.
+*/
+
+/*
+** Normalize leading redirections by moving them after the first following
+** command segment so they apply to the intended command.
+*/
+static void	normalize_leading_redirections(t_token **head)
 {
-	if (ret == 1)
-		return (1);
-	if (ret == -1)
+	t_token	*curr;
+
+	if (!head || !*head)
+		return ;
+	curr = *head;
+	while (curr && is_operator(curr->type)
+		&& (curr->type == IN_REDIRECTION || curr->type == OUT_REDIRECTION
+			|| curr->type == APPEND_REDIRECTION)
+		&& curr->prev == NULL)
 	{
-		printf("minishell: syntax error: unclosed quote\n");
-		terminate_dll(head);
-		return (1);
+		if (!move_leading_redir_after_cmd(head, curr))
+			break ;
+		curr = *head;
 	}
-	printf("minishell: tokenization error\n");
-	return (-1);
 }
 
-static int	handle_eof_and_continue(int ret)
-{
-	if (ret == 1)
-	{
-		if (isatty(STDIN_FILENO))
-			printf("Exit minishell.\n");
-		return (1);
-	}
-	return (0);
-}
-
-static void	process_command(t_token **head, t_env **env, int *last_exit_code)
+/*
+** Process the token list: validate, normalize leading redirections, build
+** the AST and execute, updating minishell->last_exit_code.
+*/
+static void	process_command(t_token **head, t_minishell *minishell)
 {
 	t_ast	*ast;
 	t_token	*tail;
 
-	validate_and_set_error(head, env, last_exit_code);
-	if (*last_exit_code == 2)
+	if (validate_token_list(*head))
+	{
+		minishell->last_exit_code = 2;
+		terminate_dll(head);
 		return ;
+	}
+	normalize_leading_redirections(head);
 	tail = last_node(*head);
-	ast = ast_build(*head, tail, *env);
+	ast = ast_build(*head, tail, minishell);
 	if (!ast)
 	{
 		terminate_dll(head);
 		return ;
 	}
-	if (handle_redirections(*head) == -1)
-	{
-		*last_exit_code = 2;
-		set_exit_code(env, *last_exit_code);
-		close_all_fds(*head);
-		terminate_dll(head);
-		return ;
-	}
-	*last_exit_code = execute_ast(ast, env);
-	set_exit_code(env, *last_exit_code);
+	minishell->last_exit_code = execute_ast(ast, minishell);
 	close_all_fds(*head);
 	terminate_dll(head);
 }
 
-static int	run_shell_loop(t_env **env)
+static int	run_shell_loop(t_minishell *minishell)
 {
 	t_token	*head;
-	int		last_exit_code;
 	int		ret;
 	int		action;
 
-	last_exit_code = 0;
-	init_shell_env(env);
 	while (1)
 	{
 		head = NULL;
@@ -87,37 +87,39 @@ static int	run_shell_loop(t_env **env)
 		if (ret != 0)
 		{
 			action = handle_token_ret(ret, &head);
+			if (action == -1)
+				break ;
 			if (action == 1 && handle_eof_and_continue(ret))
 				break ;
-			if (action != 1)
-				break ;
-			continue ;
+			if (action == 1)
+				continue ;
 		}
-		process_command(&head, env, &last_exit_code);
+		process_command(&head, minishell);
 	}
 	terminate_dll(&head);
 	clear_history();
-	return (last_exit_code);
+	return (minishell->last_exit_code);
 }
 
 int	main(int ac, char **argv, char **envp)
 {
-	t_env	*env;
+	t_minishell	*minishell;
 
-	(void)argv;
 	if (ac > 1)
 	{
 		printf("\033[31mArguments are not required for execution.\033[0m\n");
 		return (EXIT_FAILURE);
 	}
-	env = env_init(envp);
-	if (!env)
+	safe_malloc((void **)&minishell, sizeof(t_minishell));
+	(void)argv;
+	minishell->env = env_init(envp);
+	if (!minishell->env)
 		return (EXIT_FAILURE);
-	env_update_shlvl(&env);
+	env_update_shlvl(&minishell->env);
 	rl_catch_signals = 0;
 	signal(SIGINT, signinthandler);
 	signal(SIGQUIT, SIG_IGN);
-	return (run_shell_loop(&env));
+	return (run_shell_loop(minishell));
 }
 
 // int	main(void)

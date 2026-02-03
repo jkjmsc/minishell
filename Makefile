@@ -19,13 +19,16 @@ CFLAGS	=	-Wall	-Wextra	-Werror
 CLIBS	= -lreadline
 # Source files
 SRC	=	src/main.c	\
-		src/shell_init.c \
+		src/main_helpers.c \
 		src/utils/utils1.c \
 		src/utils/utils2.c \
-		src/utils/fd_utils.c \
+		src/utils/syntax_helpers.c \
+		src/utils/syntax_validate.c \
 		src/parser/ast_build.c \
 		src/parser/ast_utils.c \
+		src/parser/expand_helpers.c \
 		src/parser/assignement.c \
+		src/parser/assignement_helpers.c \
 		src/parser/assignement1.c \
 		src/parser/assignement2.c \
 		src/utils/tokens_utils.c \
@@ -36,6 +39,7 @@ SRC	=	src/main.c	\
 		src/builtin/ft_unset.c \
 		src/builtin/ft_cd.c \
 		src/builtin/ft_export.c \
+		src/builtin/export_utils.c \
 	src/tokenization/tokenization1.c \
 	src/tokenization/tokenization2.c \
 	src/tokenization/tokenization3.c \
@@ -46,9 +50,12 @@ SRC	=	src/main.c	\
 	src/tokenization/input_utils.c \
 	src/signal_handling/signal1.c \
 		src/execution/executor.c \
+		src/execution/executor_errors.c \
 		src/execution/executor2.c \
 		src/execution/execute_special.c \
 		src/execution/redirect_utils.c \
+		src/execution/redir_apply.c \
+		src/execution/redir_spawn.c \
 		src/execution/pipe_utils.c \
 		src/execution/heredoc_utils.c \
 		src/execution/path_resolution.c \

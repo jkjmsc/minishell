@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "ast.h"
-#include "../environment/env.h"
 
 /*
 ** allocates and initializes node with given type
@@ -38,7 +37,8 @@ t_ast	*create_ast_node(t_node_type type)
 ** create_command_node("echo", "hello) -> node->argv = {"echo", "hello", NULL}
 **
 */
-t_ast	*create_command_node(t_token *start, t_token *end, t_env *env)
+t_ast	*create_command_node(t_token *start, t_token *end,
+		t_minishell *minishell)
 {
 	t_ast	*node;
 
@@ -46,7 +46,7 @@ t_ast	*create_command_node(t_token *start, t_token *end, t_env *env)
 	if (!node)
 		return (NULL);
 	node->prefix_env = get_prefix_assignments(start, end);
-	node->cmd_args = tokens_to_argv(start, end, env);
+	node->cmd_args = tokens_to_argv(start, end, minishell);
 	return (node);
 }
 
@@ -101,7 +101,7 @@ t_token	*find_lowest_precedence_operator(t_token *head, t_token *end)
 **                               \
 **                             [CMD grep h]
 */
-t_ast	*ast_build(t_token *head, t_token *tail, t_env *env)
+t_ast	*ast_build(t_token *head, t_token *tail, t_minishell *minishell)
 {
 	t_token	*pivot;
 	t_ast	*node;
@@ -112,9 +112,9 @@ t_ast	*ast_build(t_token *head, t_token *tail, t_env *env)
 	if (pivot)
 	{
 		node = create_ast_node(pivot->type);
-		node->left = ast_build(head, pivot->prev, env);
-		node->right = ast_build(pivot->next, tail, env);
+		node->left = ast_build(head, pivot->prev, minishell);
+		node->right = ast_build(pivot->next, tail, minishell);
 		return (node);
 	}
-	return (create_command_node(head, tail, env));
+	return (create_command_node(head, tail, minishell));
 }

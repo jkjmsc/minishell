@@ -17,7 +17,9 @@
 
 # define NOT_A_VALID_IDENTIFIER "not a valid identifier"
 # define TOO_MANY_ARG "too many arguments"
+# define NUMERIC_ARGUMENT "numeric argument required"
 # define NO_SUCH_FILE_DIRECTORY "No such file or directory"
+# define INVALID_OPTION "invalid option"
 
 void	builtin_error(const char *msg, char *cmd, char *arg);
 

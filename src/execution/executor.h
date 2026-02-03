@@ -14,6 +14,7 @@
 # define EXECUTOR_H
 
 # include "../environment/env.h"
+# include "../minishell.h"
 # include "../parser/ast.h"
 
 /*
@@ -23,42 +24,46 @@
 ** For command "ls" and PATH="/usr/bin:/bin:/usr/local/bin"
 ** find_path("ls") -> "/bin/ls"
 */
-char		*find_path(char *cmd, t_env *env);
+char			*find_path(char *cmd, t_env *env);
 
 /*
 ** return exit status of the command executed
 */
-int			execute_ast(t_ast *root, t_env **env);
+int				execute_ast(t_ast *root, t_minishell *minishell);
 
-void		restore_stdio(int saved_in, int saved_out);
+void			restore_stdio(int saved_in, int saved_out);
 
-int			execute_command(t_ast *node, t_env **env);
+int				execute_command(t_ast *node, t_minishell *minishell);
 
-void		reset_child_signals(void);
+void			reset_child_signals(void);
 
-char		*get_cmd_path(char *cmd, t_env *env);
+char			*get_cmd_path(char *cmd, t_env *env);
 
-void		apply_prefix_env(t_env **env, char **prefix_env);
+void			apply_prefix_env(t_minishell *minishell, char **prefix_env);
 
-void		exec_child(char **cmd_args, char *path, t_env **env);
+void			exec_child(char **cmd_args, char *path, t_minishell *minishell);
 
-int			execute_forked_command(t_ast *node, t_env **env);
+void			exec_child_error(char *path);
 
-int			is_builtin(char *cmd);
+int				execute_forked_command(t_ast *node, t_minishell *minishell);
 
-int			execute_builtin(t_ast *node, t_env **env);
+int				is_builtin(char *cmd);
 
-int			write_heredoc_content(int fd, char *delimiter);
+int				execute_builtin(t_ast *node, t_minishell *minishell);
+
+int				write_heredoc_content(int fd, char *delimiter);
 
 typedef struct s_pipe_params
 {
-	t_ast	*node;
-	t_env	**env;
-	int		pipe_fd;
-	int		target_fd;
-}			t_pipe_params;
+	t_ast		*node;
+	t_minishell	*minishell;
+	int			pipe_fd;
+	int			target_fd;
+}				t_pipe_params;
 
-void		spawn_pipe_child(pid_t *pid, t_pipe_params *p, int unused_fd);
-int			wait_pipe_children(pid_t left_pid, pid_t right_pid);
+void			spawn_pipe_child(pid_t *pid, t_pipe_params *p, int unused_fd);
+int				wait_pipe_children(pid_t left_pid, pid_t right_pid);
+
+int				apply_redir_to_fd(t_ast *node, int *fd);
 
 #endif

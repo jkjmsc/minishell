@@ -15,6 +15,9 @@
 #include "../utils/utils.h"
 #include "ast.h"
 
+#define MARKER_DOUBLE_QUOTE '\x01'
+#define MARKER_SINGLE_QUOTE '\x02'
+
 /*
 ** we need to know the numbers of tokens
 ** between 2 segment (start-> end) for argv
@@ -34,16 +37,7 @@ int	count_tokens_range(t_token *start, t_token *end)
 	return (count);
 }
 
-char	*expand_token(char *token, t_env *env)
-{
-	if (!token || !token[0])
-		return (ft_strdup(""));
-	if (token[0] == '~' && (token[1] == '\0' || token[1] == '/'))
-		return (expand_tilde(token, env));
-	if (ft_strchr(token, '$'))
-		return (expand_value(token, env));
-	return (ft_strdup(token));
-}
+char	*expand_token(char *token, t_minishell *minishell);
 
 /*
 ** convert tokens into an array
@@ -52,7 +46,7 @@ char	*expand_token(char *token, t_env *env)
 ** ["echo"]["hello"]['world] -> argv = {"echo", "hello", "world", NULL}
 **
 */
-char	**tokens_to_argv(t_token *start, t_token *end, t_env *env)
+char	**tokens_to_argv(t_token *start, t_token *end, t_minishell *minishell)
 {
 	char	**argv;
 	int		i;
@@ -71,7 +65,7 @@ char	**tokens_to_argv(t_token *start, t_token *end, t_env *env)
 	current = start;
 	while (current && current != end->next)
 	{
-		argv[i++] = expand_token(current->value, env);
+		argv[i++] = expand_token(current->value, minishell);
 		current = current->next;
 	}
 	argv[i] = NULL;

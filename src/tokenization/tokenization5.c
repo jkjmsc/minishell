@@ -25,7 +25,7 @@ int	extract_normal_token(char *token, int *i, char **tmp, int *len)
 			continue ;
 		}
 		if (token[*i] == '<' || token[*i] == '>' || token[*i] == '|'
-			|| token[*i] == '&')
+			|| token[*i] == '&' || token[*i] == '(' || token[*i] == ')')
 			break ;
 		(*i)++;
 	}
@@ -57,28 +57,6 @@ int	add_token_to_list(t_token **head, t_token **prev, char *token, int idx)
 		return (0);
 	}
 	return (process_token_string(head, prev, token, idx));
-}
-
-/*
-** Function to check whether there exist odd
-** or even number of a specific character.
-*/
-int	count_char(const char *buffer, const char c)
-{
-	int	count;
-	int	i;
-
-	if (!buffer)
-		return (0);
-	count = 0;
-	i = 0;
-	while (buffer[i])
-	{
-		if (buffer[i] == c)
-			count++;
-		i++;
-	}
-	return (count);
 }
 
 // int	add_token_to_list(t_token **head, t_token **prev, char *token, int idx)

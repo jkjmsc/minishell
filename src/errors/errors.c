@@ -23,8 +23,13 @@ void	builtin_error(const char *msg, char *cmd, char *argv)
 {
 	ft_putstr_fd("minishell: ", 2);
 	ft_putstr_fd(cmd, 2);
-	ft_putstr_fd(": `", 2);
-	ft_putstr_fd(argv, 2);
-	ft_putstr_fd("': ", 2);
+	if (argv)
+	{
+		ft_putstr_fd(": `", 2);
+		ft_putstr_fd(argv, 2);
+		ft_putstr_fd("': ", 2);
+	}
+	else
+		ft_putstr_fd(": ", 2);
 	ft_putendl_fd((char *)msg, 2);
 }

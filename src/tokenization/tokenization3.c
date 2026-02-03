@@ -13,7 +13,8 @@
 #include "token.h"
 
 /*
-** Function to find the type of the token and assign it to the node
+** Function to find the type of the token and assign it to the node.
+** Recognizes '>|' as an OUT_REDIRECTION (force-overwrite) like bash.
 */
 t_node_type	token_type_finder(char *buffer)
 {
@@ -25,6 +26,8 @@ t_node_type	token_type_finder(char *buffer)
 		return (APPEND_REDIRECTION);
 	if (ft_strncmp(buffer, "<<", 2) == 0)
 		return (HEREDOC);
+	if (ft_strncmp(buffer, ">|", 2) == 0)
+		return (OUT_REDIRECTION);
 	if (ft_strncmp(buffer, "|", 1) == 0)
 		return (PIPE);
 	if (ft_strncmp(buffer, "&", 1) == 0)

@@ -14,7 +14,7 @@
 # define ENV_H
 
 # include "../../lib/libft/libft.h"
-# include <stdlib.h>
+# include "../minishell.h"
 
 typedef struct s_env
 {

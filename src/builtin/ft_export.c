@@ -6,7 +6,7 @@
 /*   By: radandri <radandri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/27 21:21:35 by radandri          #+#    #+#             */
-/*   Updated: 2026/01/16 06:42:36 by radandri         ###   ########.fr       */
+/*   Updated: 2026/01/29 06:42:36 by radandri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
  ** Rules:
  ** - Must start with a letter (a-z, A-Z) or underscore (_).
  ** - Subsequent characters can be letters, digits (0-9), or underscores.
- ** - Can optionally contain an '=' character to separate key and value.
+ ** - Can optionally contain an '=' or '+=' to separate key and value.
  */
 static int	is_valid_identifier(const char *str)
 {
@@ -32,90 +32,55 @@ static int	is_valid_identifier(const char *str)
 	while (str[i] && str[i] != '=')
 	{
 		if (!(ft_isalnum(str[i]) || str[i] == '_'))
+		{
+			if (str[i] == '+' && str[i + 1] == '=')
+				return (1);
 			return (0);
+		}
 		i++;
 	}
 	return (1);
 }
 
-/*
- ** Sort the environment variables char** alphabetically by key.
- */
-static void	sort_env_tab(char **env)
-{
-	int		i;
-	int		swapped;
-	char	*tmp;
-
-	swapped = 1;
-	while (swapped)
-	{
-		swapped = 0;
-		i = 0;
-		while (env[i] && env[i + 1])
-		{
-			if (ft_strcmp(env[i], env[i + 1]) > 0)
-			{
-				tmp = env[i];
-				env[i] = env[i + 1];
-				env[i + 1] = tmp;
-				swapped = 1;
-			}
-			i++;
-		}
-	}
-}
-
-static void	print_export_env(t_env *env)
-{
-	char	**tab;
-	int		i;
-
-	tab = env_to_array(env);
-	sort_env_tab(tab);
-	i = 0;
-	while (tab[i])
-	{
-		printf("declare -x %s\n", tab[i]);
-		free(tab[i]);
-		i++;
-	}
-	free(tab);
-}
-
 static int	process_export_arg(const char *arg, char *cmd, t_env **env)
 {
-	char	*key;
-	char	*value;
 	char	*equal_sign;
 
+	if (arg[0] == '-')
+		return (builtin_error(NOT_A_VALID_IDENTIFIER, cmd, (char *)arg), 2);
 	if (!is_valid_identifier(arg))
 		return (builtin_error(NOT_A_VALID_IDENTIFIER, cmd, (char *)arg), 1);
 	equal_sign = ft_strchr(arg, '=');
 	if (equal_sign)
 	{
-		key = ft_substr(arg, 0, equal_sign - arg);
-		value = ft_strdup(equal_sign + 1);
-		env_set(env, key, value);
-		free(key);
-		free(value);
+		if (equal_sign > arg && equal_sign[-1] == '+')
+			handle_export_append(arg, equal_sign, env);
+		else
+			handle_export_assign(arg, equal_sign, env);
 	}
 	return (0);
 }
 
-int	ft_export(int argc, char **argv, t_env **env)
+int	ft_export(int argc, char **argv, t_minishell *minishell)
 {
 	int	i;
 	int	status;
+	int	ret;
 
 	status = 0;
 	if (argc == 1)
-		return (print_export_env(*env), 0);
+		return (print_export_env(minishell->env), 0);
 	i = 1;
 	while (argv[i])
 	{
-		if (process_export_arg(argv[i++], argv[0], env) != 0)
-			status = 1;
+		ret = process_export_arg(argv[i++], argv[0], &minishell->env);
+		if (ret != 0)
+		{
+			if (ret == 2)
+				status = 2;
+			else if (status != 2)
+				status = 1;
+		}
 	}
 	return (status);
 }

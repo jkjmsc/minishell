@@ -56,30 +56,33 @@ int	print_syntax_not_implemented(const char *op)
 	return (1);
 }
 
-/*
-** Validate token list for unsupported operators (&&, ||, (), &).
-** Returns 1 if an unsupported operator was found and error printed.
-** Returns 0 if all tokens are valid.
-*/
-int	validate_token_list(t_token *head)
+const char	*print_type_node_by_int(int type)
 {
-	t_token	*curr;
-
-	curr = head;
-	while (curr != NULL)
-	{
-		if (curr->type == AND && print_syntax_not_implemented("&&"))
-			return (1);
-		if (curr->type == OR && print_syntax_not_implemented("||"))
-			return (1);
-		if ((curr->type == O_SUBSHELL || curr->type == C_SUBSHELL)
-			&& print_syntax_not_implemented("()"))
-			return (1);
-		if (curr->type == AMPERSAND && print_syntax_not_implemented("&"))
-			return (1);
-		curr = curr->next;
-	}
-	return (0);
+	if (type == 1)
+		return ("CMD");
+	else if (type == 2)
+		return ("PIPE");
+	else if (type == 3)
+		return ("OR");
+	else if (type == 4)
+		return ("AND");
+	else if (type == 5)
+		return ("AMPERSAND");
+	else if (type == 6)
+		return ("O_SUBSHELL");
+	else if (type == 7)
+		return ("C_SUBSHELL");
+	else if (type == 8)
+		return ("IN_REDIRECTION");
+	else if (type == 9)
+		return ("OUT_REDIRECTION");
+	else if (type == 10)
+		return ("APPEND_REDIRECTION");
+	else if (type == 11)
+		return ("HEREDOC");
+	else if (type == 12)
+		return ("WORD");
+	return ("UNKNOWN");
 }
 
 void	print_tokens(t_token *head)
@@ -90,8 +93,8 @@ void	print_tokens(t_token *head)
 	printf("Token List:\n");
 	while (tmp)
 	{
-		printf("  idx: %d | type: %d | value: [%s] | fd: [%d]\n", tmp->idx,
-			tmp->type, tmp->value, tmp->fd);
+		printf("  idx: %d | type: %s | value: [%s] | fd: [%d]\n", tmp->idx,
+			print_type_node_by_int(tmp->type), tmp->value, tmp->fd);
 		tmp = tmp->next;
 	}
 }

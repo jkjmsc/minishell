@@ -17,17 +17,17 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-static void	execute_in_child(t_ast *node, t_env **env, char *path)
+static void	execute_in_child(t_ast *node, t_minishell *minishell, char *path)
 {
 	if (!path)
 	{
 		printf("minishell: command not found: %s.\n", node->cmd_args[0]);
 		exit(127);
 	}
-	exec_child(node->cmd_args, path, env);
+	exec_child(node->cmd_args, path, minishell);
 }
 
-int	execute_forked_command(t_ast *node, t_env **env)
+int	execute_forked_command(t_ast *node, t_minishell *minishell)
 {
 	pid_t	pid;
 	int		status;
@@ -38,8 +38,9 @@ int	execute_forked_command(t_ast *node, t_env **env)
 	if (pid == 0)
 	{
 		reset_child_signals();
-		apply_prefix_env(env, node->prefix_env);
-		execute_in_child(node, env, get_cmd_path(node->cmd_args[0], *env));
+		apply_prefix_env(minishell, node->prefix_env);
+		execute_in_child(node, minishell, get_cmd_path(node->cmd_args[0],
+				minishell->env));
 	}
 	if (waitpid(pid, &status, 0) == -1)
 		return (perror("waitpid"), -1);

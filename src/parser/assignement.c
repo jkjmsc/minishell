@@ -12,7 +12,9 @@
 
 #include "../../lib/libft/libft.h"
 #include "../environment/env.h"
+#include "../minishell.h"
 #include "../utils/utils.h"
+#include "assignement.h"
 
 int	is_assignment(const char *token)
 {
@@ -64,53 +66,30 @@ int	split_key_value_assignment(const char *token, char **key, char **value)
 	return (0);
 }
 
-static char	*get_var_name(const char *value, int *i)
+char	*expand_value(const char *value, t_minishell *minishell)
 {
-	char	*var;
-	int		start;
-
-	start = ++(*i);
-	if (value[start] == '?')
-	{
-		(*i)++;
-		var = ft_strdup("?");
-	}
-	else
-	{
-		while (ft_isalnum(value[*i]) || value[*i] == '_')
-			(*i)++;
-		var = ft_substr(value, start, *i - start);
-	}
-	return (var);
-}
-
-char	*expand_and_join(char *result, const char *value, int *i,
-		t_env *env)
-{
-	char	*var;
+	char	*result;
 	char	*tmp;
-	char	*var_value;
+	int		i;
 
-	var = get_var_name(value, i);
-	if (!var)
-		return (free(result), NULL);
-	var_value = env_get(env, var);
-	if (!var_value)
-		var_value = "";
-	tmp = ft_strjoin(result, var_value);
-	free(result);
-	free(var);
-	return (tmp);
-}
-
-char	*append_char(char *result, char c)
-{
-	char	buf[2];
-	char	*tmp;
-
-	buf[0] = c;
-	buf[1] = '\0';
-	tmp = ft_strjoin(result, buf);
-	free(result);
-	return (tmp);
+	if (!value)
+		return (ft_strdup(""));
+	result = ft_strdup("");
+	if (!result)
+		return (NULL);
+	i = 0;
+	while (value[i])
+	{
+		if (value[i] == '$' && value[i + 1] == '?')
+			tmp = append_exit_code(result, minishell, &i);
+		else if (value[i] == '$' && (ft_isalpha(value[i + 1])
+				|| value[i + 1] == '_'))
+			tmp = expand_and_join(result, value, &i, minishell->env);
+		else
+			tmp = append_char(result, value[i++]);
+		if (!tmp)
+			return (NULL);
+		result = tmp;
+	}
+	return (result);
 }

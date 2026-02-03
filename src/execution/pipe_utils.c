@@ -11,9 +11,9 @@
 /* ************************************************************************** */
 
 #include "executor.h"
-#include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 void	spawn_pipe_child(pid_t *pid, t_pipe_params *p, int unused_fd)
 {
@@ -26,7 +26,7 @@ void	spawn_pipe_child(pid_t *pid, t_pipe_params *p, int unused_fd)
 			perror("dup2");
 		close(p->pipe_fd);
 		close(unused_fd);
-		exit(execute_ast(p->node, p->env));
+		exit(execute_ast(p->node, p->minishell));
 	}
 }
 

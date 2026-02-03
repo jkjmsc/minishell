@@ -1,36 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_unset.c                                         :+:      :+:    :+:   */
+/*   assignement.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: radandri <radandri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/16 13:16:36 by radandri          #+#    #+#             */
-/*   Updated: 2025/12/16 13:33:23 by radandri         ###   ########.fr       */
+/*   Created: 2026/01/17 06:11:27 by radandri          #+#    #+#             */
+/*   Updated: 2026/01/18 03:49:04 by radandri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../errors/errors.h"
-#include "builtin.h"
+#ifndef ASSIGNEMENT_H
+# define ASSIGNEMENT_H
 
-static int	is_invalid_option(const char *arg)
-{
-	if (arg[0] == '-' && arg[1] != '\0')
-		return (1);
-	return (0);
-}
+# include "../environment/env.h"
+# include "../minishell.h"
 
-int	ft_unset(char **args, t_env **env)
-{
-	int	i;
+char	*expand_and_join(char *result, const char *value, int *i, t_env *env);
+char	*append_char(char *result, char c);
+char	*append_exit_code(char *result, t_minishell *minishell, int *i);
 
-	i = 1;
-	while (args[i])
-	{
-		if (is_invalid_option(args[i]))
-			return (builtin_error(INVALID_OPTION, args[0], args[i]), 2);
-		*env = env_remove(*env, args[i]);
-		i++;
-	}
-	return (0);
-}
+#endif
