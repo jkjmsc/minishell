@@ -33,7 +33,11 @@ int	execute_forked_command(t_ast *node, t_minishell *minishell)
 {
 	pid_t	pid;
 	int		status;
+	char	*path;
 
+	path = get_cmd_path(node->cmd_args[0], minishell->env);
+	if (path)
+		env_set(&minishell->env, "_", path);
 	pid = fork();
 	if (pid < 0)
 		return (perror("fork"), -1);
@@ -41,8 +45,7 @@ int	execute_forked_command(t_ast *node, t_minishell *minishell)
 	{
 		reset_child_signals();
 		apply_prefix_env(minishell, node->prefix_env);
-		execute_in_child(node, minishell, get_cmd_path(node->cmd_args[0],
-				minishell->env));
+		execute_in_child(node, minishell, path);
 	}
 	if (waitpid(pid, &status, 0) == -1)
 		return (perror("waitpid"), -1);

@@ -18,12 +18,10 @@
 #define MARKER_DOUBLE_QUOTE '\x01'
 #define MARKER_SINGLE_QUOTE '\x02'
 
-char	*expand_token(char *token, t_minishell *minishell)
+static char	*handle_marked_quote(char *token, t_minishell *minishell)
 {
 	char	*result;
 
-	if (!token || !token[0])
-		return (ft_strdup(""));
 	if (token[0] == MARKER_SINGLE_QUOTE)
 		return (ft_strdup(token + 1));
 	if (token[0] == MARKER_DOUBLE_QUOTE)
@@ -32,6 +30,33 @@ char	*expand_token(char *token, t_minishell *minishell)
 		result = expand_value_ex(token, minishell, 0);
 		return (result);
 	}
+	return (NULL);
+}
+
+static char	*handle_ansi_c_quote(char *token)
+{
+	int	len;
+
+	if (token[0] != '$' || token[1] != '\'')
+		return (NULL);
+	len = ft_strlen(token);
+	if (len >= 3 && token[len - 1] == '\'')
+		return (ft_substr(token, 2, len - 3));
+	return (NULL);
+}
+
+char	*expand_token(char *token, t_minishell *minishell)
+{
+	char	*result;
+
+	if (!token || !token[0])
+		return (ft_strdup(""));
+	result = handle_marked_quote(token, minishell);
+	if (result)
+		return (result);
+	result = handle_ansi_c_quote(token);
+	if (result)
+		return (result);
 	if (token[0] == '~' && (token[1] == '\0' || token[1] == '/'))
 		return (expand_tilde(token, minishell->env));
 	result = expand_value_ex(token, minishell, 1);
