@@ -76,10 +76,10 @@ OBJ	=	$(SRC:src/%.c=$(OBJ_DIR)/%.o)
 BOBJ	=	$(BSRC:.c=.o)
 # User-defined library
 LIBFT = lib/libft/libft.a
-GETNXTLINE = lib/get_next_line/get_next_line.a
+GETNXTLINE = lib/getnextline/getnextline.a
 # Directories in which the files are present
 LIBFT_DIR	=	lib/libft
-GETNXTLINE_DIR	=	lib/get_next_line
+GETNXTLINE_DIR	=	lib/getnextline
 # Default rule
 all: $(NAME)
 # Linking the object files into the final executable
@@ -102,11 +102,13 @@ $(BNAME):	$(BOBJ)
 	$(CC)	$(CFLAGS)	-o	$(BNAME)	$(BOBJ)
 # Clean object files
 clean:
-	make	-C	$(LIBFT_DIR)	$(GETNXTLINE_DIR)	clean
+	make	-C	$(LIBFT_DIR)	clean
+	make	-C	$(GETNXTLINE_DIR)	clean
 	rm		-rf	$(OBJ_DIR)
 # Clean everything (objects + executable)
 fclean: clean
-	make	-C	$(LIBFT_DIR)	$(GETNXTLINE_DIR)	fclean
+	make	-C	$(LIBFT_DIR)	fclean
+	make	-C	$(GETNXTLINE_DIR)	fclean
 	rm		-f	$(NAME)
 	rm		-f	$(BNAME)
 # Rebuild everything

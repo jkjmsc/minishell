@@ -71,12 +71,18 @@ char	*find_path(char *cmd, t_env *env)
 {
 	char	*path;
 	char	**dirs;
+	char	*result;
 
 	if (!cmd || !env)
 		return (NULL);
 	path = (char *)env_get(env, "PATH");
 	if (!path || path[0] == '\0')
+	{
+		result = check_cmd_in_dir(".", cmd);
+		if (result)
+			return (result);
 		return (NULL);
+	}
 	path = ft_strdup(path);
 	if (!path)
 		return (NULL);

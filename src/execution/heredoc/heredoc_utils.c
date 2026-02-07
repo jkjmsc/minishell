@@ -14,10 +14,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include "../../../lib/getnextline/get_next_line.h"
 #include "utils/utils.h"
 
-static void	read_and_write_heredoc(int fd, char *line, size_t len, char *delim)
+static void	read_and_write_heredoc(int fd, char *delim)
 {
+	char	*line;
+
 	while (1)
 	{
 		if (isatty(STDIN_FILENO))
@@ -25,11 +28,9 @@ static void	read_and_write_heredoc(int fd, char *line, size_t len, char *delim)
 			fprintf(stderr, "> ");
 			fflush(stderr);
 		}
-		if (getline(&line, &len, stdin) == -1)
-		{
-			free(line);
+		line = get_next_line(STDIN_FILENO);
+		if (line == NULL)
 			break ;
-		}
 		if (line[ft_strlen(line) - 1] == '\n')
 			line[ft_strlen(line) - 1] = '\0';
 		if (ft_strcmp(line, delim) == 0)
@@ -39,16 +40,12 @@ static void	read_and_write_heredoc(int fd, char *line, size_t len, char *delim)
 		}
 		write(fd, line, ft_strlen(line));
 		write(fd, "\n", 1);
+		free(line);
 	}
 }
 
 int	write_heredoc_content(int fd, char *delimiter)
 {
-	char	*line;
-	size_t	len;
-
-	line = NULL;
-	len = 0;
-	read_and_write_heredoc(fd, line, len, delimiter);
+	read_and_write_heredoc(fd, delimiter);
 	return (0);
 }
