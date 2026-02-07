@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libreadline-dev
+          sudo apt-get install -y libreadline-dev valgrind
 
       - name: Build minishell
         run: |
@@ -71,3 +71,116 @@ jobs:
           path: |
             valgrind.log
             output.log
+
+  minishell-tester:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite:
+          - { name: "Overview", args: "m" }
+          - { name: "Parsing", args: "m pa" }
+          - { name: "Builtins", args: "m b" }
+          - { name: "Redirections", args: "m r" }
+          - { name: "Pipelines", args: "m pi" }
+          - { name: "Variables", args: "m v" }
+          - { name: "Commands", args: "m c" }
+          - { name: "Correction", args: "m co" }
+          - { name: "Path fails", args: "m path" }
+          - { name: "Syntax errors", args: "m s" }
+          - { name: "Overview + Valgrind", args: "vm" }
+          - { name: "Without environment", args: "ne" }
+          - { name: "Pipe segfault", args: "d" }
+    name: Tester - ${{ matrix.test-suite.name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreadline-dev valgrind
+
+      - name: Build minishell
+        run: make re
+
+      - name: Install minishell tester
+        run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/zstenger93/42_minishell_tester/master/install.sh)"
+
+      - name: Run ${{ matrix.test-suite.name }} tests
+        id: test
+        continue-on-error: true
+        run: |
+          echo "Running ${{ matrix.test-suite.name }} tests..."
+          bash ~/42_minishell_tester/tester.sh ${{ matrix.test-suite.args }} 2>&1 | tee test_output.log
+          exit ${PIPESTATUS[0]}
+          
+      - name: Display results
+        if: always()
+        run: |
+          echo ""
+          echo "════════════════════════════════════════════════════════════"
+          echo "   🧪 ${{ matrix.test-suite.name }} TEST RESULTS SUMMARY"
+          echo "════════════════════════════════════════════════════════════"
+          echo ""
+          
+          if grep -q "TOTAL TEST COUNT:" test_output.log; then
+            TOTAL=$(grep "TOTAL TEST COUNT:" test_output.log | head -1 | grep -oP 'TOTAL TEST COUNT: \K\d+' || echo "0")
+            PASSED=$(grep "TESTS PASSED:" test_output.log | head -1 | grep -oP 'TESTS PASSED: \K\d+' || echo "0")
+            
+            if [ "$TOTAL" -gt 0 ]; then
+              PERCENTAGE=$((PASSED * 100 / TOTAL))
+            else
+              PERCENTAGE=0
+            fi
+            
+            if [ "$PERCENTAGE" -eq 100 ]; then
+              STATUS="✅ PERFECT"
+            elif [ "$PERCENTAGE" -ge 90 ]; then
+              STATUS="🟢 EXCELLENT"
+            elif [ "$PERCENTAGE" -ge 75 ]; then
+              STATUS="🟡 GOOD"
+            else
+              STATUS="🔴 NEEDS WORK"
+            fi
+            
+            echo "   $STATUS - $PERCENTAGE% Pass Rate"
+            echo "   $PASSED / $TOTAL tests passing"
+            echo ""
+            echo "════════════════════════════════════════════════════════════"
+            echo ""
+            tail -8 test_output.log
+            echo ""
+            
+            echo "## 🧪 ${{ matrix.test-suite.name }} - $STATUS ($PERCENTAGE%)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Tests Passed | **$PASSED/$TOTAL** |" >> $GITHUB_STEP_SUMMARY
+            echo "| Pass Rate | **$PERCENTAGE%** |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details open>" >> $GITHUB_STEP_SUMMARY
+            echo "<summary>📋 Full Output</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -8 test_output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$PERCENTAGE" -lt 90 ]; then
+              echo "::warning::${{ matrix.test-suite.name }}: Only $PERCENTAGE% tests passing"
+              exit 1
+            fi
+          else
+            echo "❌ Could not parse test results"
+            tail -8 test_output.log
+            exit 1
+          fi
+          
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tester-logs-${{ matrix.test-suite.name }}
+          path: test_output.log

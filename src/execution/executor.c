@@ -24,8 +24,16 @@ char	*get_cmd_path(char *cmd, t_env *env)
 {
 	struct stat	stat_buf;
 
-	if ((cmd[0] == '/' || cmd[0] == '.') && stat(cmd, &stat_buf) == 0)
-		return (cmd);
+	if (!cmd || cmd[0] == '\0')
+		return (NULL);
+	if (ft_strcmp(cmd, ".") == 0 || ft_strcmp(cmd, "..") == 0)
+		return (NULL);
+	if (ft_strchr(cmd, '/'))
+	{
+		if (stat(cmd, &stat_buf) == 0)
+			return (cmd);
+		return (NULL);
+	}
 	return (find_path(cmd, env));
 }
 
@@ -43,7 +51,7 @@ void	apply_prefix_env(t_minishell *minishell, char **prefix_env)
 	{
 		if (split_key_value_assignment(prefix_env[i], &key, &value) == 0)
 		{
-			expanded = expand_value(value, minishell);
+			expanded = expand_value_ex(value, minishell, 1);
 			if (expanded)
 			{
 				process_compound_assignment(&minishell->env, prefix_env[i], key,

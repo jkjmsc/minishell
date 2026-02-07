@@ -68,8 +68,8 @@ void					close_fd(t_token *token);
 int						is_assignment(const char *token);
 int						split_key_value_assignment(const char *token,
 							char **key, char **value);
-char					*expand_value(const char *value,
-							t_minishell *minishell);
+char					*expand_value_ex(const char *value,
+							t_minishell *minishell, int track_quotes);
 int						process_assignment(t_minishell *minishell,
 							const char *token);
 int						process_compound_assignment(t_env **env,

@@ -10,15 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "core/main_helpers.h"
 #include "environment/env.h"
 #include "execution/executor.h"
 #include "minishell.h"
-#include "main_helpers.h"
 #include "parser/ast.h"
 #include "signal_handling/signal_handle.h"
 #include "tokenization/token.h"
 #include "utils/utils.h"
-#include <readline/readline.h>
+#include <unistd.h>
 
 /*
 ** Move a single leading redirection and its filename after the following
@@ -36,10 +36,9 @@ static void	normalize_leading_redirections(t_token **head)
 	if (!head || !*head)
 		return ;
 	curr = *head;
-	while (curr && is_operator(curr->type)
-		&& (curr->type == IN_REDIRECTION || curr->type == OUT_REDIRECTION
-			|| curr->type == APPEND_REDIRECTION)
-		&& curr->prev == NULL)
+	while (curr && is_operator(curr->type) && (curr->type == IN_REDIRECTION
+			|| curr->type == OUT_REDIRECTION
+			|| curr->type == APPEND_REDIRECTION) && curr->prev == NULL)
 	{
 		if (!move_leading_redir_after_cmd(head, curr))
 			break ;
@@ -50,8 +49,10 @@ static void	normalize_leading_redirections(t_token **head)
 /*
 ** Process the token list: validate, normalize leading redirections, build
 ** the AST and execute, updating minishell->last_exit_code.
+** Returns 1 if the shell should exit (non-interactive syntax error),
+	0 otherwise.
 */
-static void	process_command(t_token **head, t_minishell *minishell)
+static int	process_command(t_token **head, t_minishell *minishell)
 {
 	t_ast	*ast;
 	t_token	*tail;
@@ -60,7 +61,9 @@ static void	process_command(t_token **head, t_minishell *minishell)
 	{
 		minishell->last_exit_code = 2;
 		terminate_dll(head);
-		return ;
+		if (!isatty(STDIN_FILENO))
+			return (1);
+		return (0);
 	}
 	normalize_leading_redirections(head);
 	tail = last_node(*head);
@@ -68,11 +71,13 @@ static void	process_command(t_token **head, t_minishell *minishell)
 	if (!ast)
 	{
 		terminate_dll(head);
-		return ;
+		return (0);
 	}
 	minishell->last_exit_code = execute_ast(ast, minishell);
 	close_all_fds(*head);
+	free_ast(ast);
 	terminate_dll(head);
+	return (0);
 }
 
 static int	run_shell_loop(t_minishell *minishell)
@@ -95,16 +100,18 @@ static int	run_shell_loop(t_minishell *minishell)
 			if (action == 1)
 				continue ;
 		}
-		process_command(&head, minishell);
+		if (process_command(&head, minishell))
+			break ;
 	}
 	terminate_dll(&head);
-	clear_history();
+	rl_clear_history();
 	return (minishell->last_exit_code);
 }
 
 int	main(int ac, char **argv, char **envp)
 {
 	t_minishell	*minishell;
+	int			ret;
 
 	if (ac > 1)
 	{
@@ -118,10 +125,12 @@ int	main(int ac, char **argv, char **envp)
 		return (EXIT_FAILURE);
 	env_update_shlvl(&minishell->env);
 	rl_catch_signals = 0;
-	rl_outstream = stderr;
 	signal(SIGINT, signinthandler);
 	signal(SIGQUIT, SIG_IGN);
-	return (run_shell_loop(minishell));
+	ret = run_shell_loop(minishell);
+	env_free(minishell->env);
+	free(minishell);
+	return (ret);
 }
 
 // int	main(void)

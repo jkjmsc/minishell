@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   executor_errors.c                                  :+:      :+:    :+:   */
+/*   syntax_helpers.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: radandri <radandri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,34 +10,33 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../utils/utils.h"
-#include "executor.h"
-#include <stdlib.h>
-#include <sys/stat.h>
+#include "utils/utils.h"
 
-static void	exit_directory_error(char *path)
+int	is_syntax_operator(t_node_type type)
 {
-	if (path[0] == '/')
-	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd(path, 2);
-		ft_putendl_fd(": Is a directory", 2);
-		exit(126);
-	}
-	ft_putstr_fd("minishell: ", 2);
-	ft_putstr_fd(path, 2);
-	ft_putendl_fd(": command not found", 2);
-	exit(127);
+	return (type == PIPE || type == IN_REDIRECTION || type == OUT_REDIRECTION
+		|| type == APPEND_REDIRECTION || type == HEREDOC);
 }
 
-void	exec_child_error(char *path)
+static const char	*get_operator_string(t_node_type type)
 {
-	struct stat	stat_buf;
+	if (type == PIPE)
+		return ("|");
+	if (type == IN_REDIRECTION)
+		return ("<");
+	if (type == OUT_REDIRECTION)
+		return (">");
+	if (type == APPEND_REDIRECTION)
+		return (">>");
+	if (type == HEREDOC)
+		return ("<<");
+	return ("unknown");
+}
 
-	if (stat(path, &stat_buf) == 0 && S_ISDIR(stat_buf.st_mode))
-		exit_directory_error(path);
-	ft_putstr_fd("minishell: ", 2);
-	ft_putstr_fd(path, 2);
-	ft_putendl_fd(": No such file or directory", 2);
-	exit(127);
+int	print_unexpected_token(t_node_type type)
+{
+	ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
+	ft_putstr_fd((char *)get_operator_string(type), 2);
+	ft_putendl_fd("'", 2);
+	return (1);
 }

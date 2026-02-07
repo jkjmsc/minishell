@@ -24,9 +24,7 @@ static int	is_single_quoted(const char *str)
 	if (!str)
 		return (0);
 	len = ft_strlen(str);
-	if (len < 2)
-		return (0);
-	if (str[0] != '\'' && str[0] != '"')
+	if (len < 2 || (str[0] != '\'' && str[0] != '"'))
 		return (0);
 	if (str[0] != str[len - 1])
 		return (0);
@@ -37,9 +35,10 @@ static int	is_single_quoted(const char *str)
 			i++;
 		return (str[i] == '\'' && i == len - 1);
 	}
-	if (str[0] == '"')
-		return (str[len - 1] == '"');
-	return (0);
+	i = 1;
+	while (i < len - 1 && str[i] != '"')
+		i++;
+	return (i == len - 1);
 }
 
 int	create_and_link_token(t_token **head, t_token **prev, char *tmp, int idx)

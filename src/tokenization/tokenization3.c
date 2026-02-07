@@ -76,13 +76,11 @@ static int	is_operator_before_cmd(t_token *prev)
 void	node_info(int idx, char *buffer, t_token **nxt, t_token **prev)
 {
 	t_node_type	base_type;
-	char		*value;
 
 	(*nxt) = create_node();
-	if (buffer && buffer[0] == '\x01')
+	if (buffer && (buffer[0] == '\x01' || buffer[0] == '\x02'))
 	{
-		value = buffer + 1;
-		(*nxt)->value = ft_strdup(value);
+		(*nxt)->value = ft_strdup(buffer);
 		(*nxt)->type = WORD;
 	}
 	else

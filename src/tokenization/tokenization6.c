@@ -103,7 +103,7 @@ char	*mark_tmp_if_needed(char *tmp, char quote)
 	size_t	len;
 	char	marker;
 
-	if (!quote || !tmp || tmp[0] == '\0')
+	if (!quote || !tmp)
 		return (tmp);
 	if (quote != '\'' && quote != '"')
 		return (tmp);
@@ -118,7 +118,9 @@ char	*mark_tmp_if_needed(char *tmp, char quote)
 	else
 		marker = MARKER_DOUBLE_QUOTE;
 	marked[0] = marker;
-	ft_memcpy(marked + 1, tmp, len + 1);
+	if (len > 0)
+		ft_memcpy(marked + 1, tmp, len);
+	marked[len + 1] = '\0';
 	free(tmp);
 	return (marked);
 }

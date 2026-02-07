@@ -11,8 +11,8 @@
 /* ************************************************************************** */
 
 #include "../environment/env.h"
+#include "../utils/utils.h"
 #include "executor.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -21,7 +21,9 @@ static void	execute_in_child(t_ast *node, t_minishell *minishell, char *path)
 {
 	if (!path)
 	{
-		printf("minishell: command not found: %s.\n", node->cmd_args[0]);
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(node->cmd_args[0], 2);
+		ft_putendl_fd(": command not found", 2);
 		exit(127);
 	}
 	exec_child(node->cmd_args, path, minishell);

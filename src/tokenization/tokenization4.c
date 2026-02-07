@@ -84,6 +84,7 @@ void	terminate_dll(t_token **token)
 		free(curr);
 		curr = nxt;
 	}
+	*token = NULL;
 }
 
 /*

@@ -58,18 +58,18 @@ char	*expand_tilde(char *path, t_env *env)
 	char	*expanded;
 
 	if (!path || path[0] != '~')
-		return (path);
+		return (ft_strdup(path));
 	home = env_get(env, "HOME");
 	if (!home)
 		return (NULL);
 	if (path[1] == '\0')
-		return (home);
+		return (ft_strdup(home));
 	if (path[1] == '/')
 	{
 		expanded = ft_strjoin(home, path + 1);
 		return (expanded);
 	}
-	return (path);
+	return (ft_strdup(path));
 }
 
 /*
@@ -77,17 +77,21 @@ char	*expand_tilde(char *path, t_env *env)
 ** - no args -> HOME
 ** - "--" indicates end of options: "cd --" -> HOME, "cd -- dir" -> dir
 ** - "-" -> OLDPWD (printed)
+** Sets should_free to 1 if the returned path must be freed
 */
-static char	*get_target_path(int argc, char **argv, t_env *env)
+static char	*get_target_path(int argc, char **argv, t_env *env,
+		int *should_free)
 {
 	char	*path;
 
+	*should_free = 0;
 	if (argc == 1)
 		return (env_get(env, "HOME"));
 	if (argc >= 2 && ft_strcmp(argv[1], "--") == 0)
 	{
 		if (argc == 2)
 			return (env_get(env, "HOME"));
+		*should_free = 1;
 		return (expand_tilde(argv[2], env));
 	}
 	if (ft_strncmp(argv[1], "-", 2) == 0)
@@ -97,6 +101,7 @@ static char	*get_target_path(int argc, char **argv, t_env *env)
 			ft_putendl_fd(path, 1);
 		return (path);
 	}
+	*should_free = 1;
 	return (expand_tilde(argv[1], env));
 }
 
@@ -114,10 +119,9 @@ int	ft_cd(int argc, char **argv, t_env **envp)
 	if (argc > 2 && !(argc == 3 && ft_strcmp(argv[1], "--") == 0))
 		return (cd_error("too many arguments", NULL, NULL));
 	oldpwd = getcwd(NULL, 0);
-	path = get_target_path(argc, argv, *envp);
+	path = get_target_path(argc, argv, *envp, &should_free);
 	if (!path)
 		return (cd_error("HOME not set", NULL, oldpwd));
-	should_free = (argc > 1 && argv[1][0] == '~' && path != argv[1]);
 	if (chdir(path) != 0)
 	{
 		if (should_free)

@@ -1,34 +1,40 @@
-README.md Compliance Check  
-Does the repository contain a README.md file at its root, and does it include all of the following?  
-• The first line is italicized and formatted exactly as: This project has been created as part of the 42 curriculum
-by <login1>[, <login2>[, <login3>[...]]].  
-• A "Description" section explaining the project's purpose and providing a brief overview.  
-• An "Instructions" section with relevant details about compilation, installation, and/or execution.  
-• A "Resources" section listing references (documentation, tutorials, etc.) and explaining how AI was used,
-specifying for which tasks and which parts of the project.  
+*This project has been created as part of the 42 curriculum by jkarippa, radandri.*
 
+## Description
+Minishell is a small UNIX shell inspired by Bash. It provides an interactive prompt,
+command history, environment variable expansion, redirections, pipes, and execution
+of built-in and external commands. The goal is to build a functional shell while
+learning process management, file descriptors, and signals.
 
-Readme Requirements  
-A README.md file must be provided at the root of your Git repository. Its purpose is
-to allow anyone unfamiliar with the project (peers, staff, recruiters, etc.) to quickly
-understand what the project is about, how to run it, and where to find more information
-on the topic.  
-The README.md must include at least:
-• The very first line must be italicized and read: This project has been created as part
-of the 42 curriculum by <login1>[, <login2>[, <login3>[...]]].  
+## Instructions
+### Build
+```sh
+make
+```
 
-• A “Description” section that clearly presents the project, including its goal and a
-brief overview.  
+### Run
+```sh
+./minishell
+```
 
-• An “Instructions” section containing any relevant information about compilation,
-installation, and/or execution.  
+### Clean
+```sh
+make clean
+make fclean
+```
 
-• A “Resources” section listing classic references related to the topic (documentation, articles, tutorials, etc.), as well as a description of how AI was used —
-specifying for which tasks and which parts of the project.  
+### Help
+```sh
+make help
+```
 
-➠ Additional sections may be required depending on the project (e.g., usage
-examples, feature list, technical choices, etc.).  
+## Resources
+- Bash manual: https://www.gnu.org/software/bash/manual/
+- POSIX Shell Command Language: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+- GNU Readline: https://tiswww.case.edu/php/chet/readline/rltop.html
+- 42 Minishell subject: see minishell.txt in the repository root.
 
-Any required additions will be explicitly listed below.  
-
-Your README must be written in English.  
+### AI Usage
+AI was used for testing ideas, repetitive/tedious tasks, and occasionally to help
+apply Norminette formatting on long functions. All changes were reviewed and
+validated manually.

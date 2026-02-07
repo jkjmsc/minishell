@@ -63,4 +63,5 @@ int					env_update_shlvl(t_env **env);
 int					is_number(const char *s);
 t_env				*env_remove(t_env *env, const char *key);
 char				**env_to_array(t_env *env);
+void				env_free(t_env *env);
 #endif

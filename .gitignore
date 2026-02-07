@@ -4,6 +4,9 @@
 *.so
 *.out
 
+# Object directory
+obj/
+
 # Executable
 minishell
 
